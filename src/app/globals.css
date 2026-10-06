@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* Paleta de Emilia: pelo plateado, ojos violeta, vestido blanco y lila,
+   gema verde del cuello y el hielo de su magia. */
+@theme {
+  --color-noche: #120e1a;
+  --color-noche-2: #1b1526;
+  --color-malva-900: #554164;
+  --color-violeta-700: #7b4b9f;
+  --color-violeta-500: #a372c3;
+  --color-lila-300: #c190df;
+  --color-lavanda: #b59ef0;
+  --color-plata: #e2e2e2;
+  --color-nieve: #fafafa;
+  --color-hielo: #90bff9;
+  --color-hielo-700: #649cc1;
+  --color-gema: #77cd8e;
+  --color-oro-palido: #f0dead;
+  --color-peligro: #bd463e;
+}
+
+/* inline: las variables de next/font viven en <html>, así que las utilidades
+   deben referenciarlas directamente en vez de resolverlas en :root. */
+@theme inline {
+  --font-display: var(--font-cormorant), Georgia, serif;
+  --font-ui: var(--font-jost), system-ui, sans-serif;
+  --font-lectura: var(--font-literata), Georgia, serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+@utility texto-plata {
+  background-image: linear-gradient(
+    175deg,
+    var(--color-nieve) 0%,
+    var(--color-plata) 30%,
+    var(--color-lila-300) 70%,
+    var(--color-violeta-500) 100%
+  );
+  background-clip: text;
+  color: transparent;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-noche);
+    color: var(--color-nieve);
+    font-family: var(--font-ui);
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-lavanda) 45%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-lavanda);
+    outline-offset: 3px;
+  }
+}
