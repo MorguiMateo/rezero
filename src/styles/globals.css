@@ -1,0 +1,42 @@
+@import "tailwindcss";
+@import "./palettes.css";
+@import "./themes.css";
+
+@import "./fonts.css";
+
+@theme {
+  --font-display: "Cormorant Variable", Georgia, serif;
+  --font-ui: "Jost Variable", system-ui, sans-serif;
+  --font-reading: "Literata Variable", Georgia, serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+}
+
+/* Emilia's silver-to-violet gradient for display titles. */
+@utility silver-gradient-text {
+  background-image: linear-gradient(
+    175deg,
+    var(--color-emilia-snow) 0%,
+    var(--color-emilia-silver) 30%,
+    var(--color-emilia-lilac-300) 70%,
+    var(--color-emilia-violet-500) 100%
+  );
+  background-clip: text;
+  color: transparent;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-ui);
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-focus) 45%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+}

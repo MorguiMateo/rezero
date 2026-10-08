@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "biblioteca-de-pleyades",
+  "compatibility_date": "2026-10-07",
+  "assets": {
+    "directory": "./build/client",
+    "html_handling": "drop-trailing-slash",
+    "not_found_handling": "none"
+  }
+}

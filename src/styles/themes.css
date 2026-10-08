@@ -1,0 +1,148 @@
+/* Semantic tokens. Components use these utilities (bg-background, text-primary,
+   border-border, ...). Their values come from the active theme below, so a
+   theme switch only changes the data-theme attribute on <html> or any wrapper.
+   inline: utilities must read var(--theme-*) where they are used, not at :root,
+   so nested data-theme wrappers work. */
+@theme inline {
+  --color-background: var(--theme-background);
+  --color-surface: var(--theme-surface);
+  --color-border: var(--theme-border);
+  --color-header: var(--theme-header);
+  --color-header-foreground: var(--theme-header-foreground);
+  --color-header-accent: var(--theme-header-accent);
+  --color-foreground: var(--theme-foreground);
+  --color-muted: var(--theme-muted);
+  --color-primary: var(--theme-primary);
+  --color-primary-fill: var(--theme-primary-fill);
+  --color-primary-soft: var(--theme-primary-soft);
+  --color-accent: var(--theme-accent);
+  --color-accent-fill: var(--theme-accent-fill);
+  --color-accent-soft: var(--theme-accent-soft);
+  --color-button: var(--theme-button);
+  --color-button-foreground: var(--theme-button-foreground);
+  --color-button-hover: var(--theme-button-hover);
+  --color-secondary: var(--theme-secondary);
+  --color-secondary-foreground: var(--theme-secondary-foreground);
+  --color-secondary-border: var(--theme-secondary-border);
+  --color-badge: var(--theme-badge);
+  --color-badge-foreground: var(--theme-badge-foreground);
+  --color-badge-border: var(--theme-badge-border);
+  --color-focus: var(--theme-focus);
+}
+
+/* Emilia theme (default, dark). */
+:root,
+[data-theme="emilia"] {
+  color-scheme: dark;
+  --theme-background: var(--color-emilia-night);
+  --theme-surface: var(--color-emilia-night-2);
+  --theme-border: var(--color-emilia-mauve-900);
+  --theme-header: var(--color-emilia-night-2);
+  --theme-header-foreground: var(--color-emilia-snow);
+  --theme-header-accent: var(--color-emilia-lilac-300);
+  --theme-foreground: var(--color-emilia-snow);
+  --theme-muted: color-mix(in oklab, var(--color-emilia-silver) 70%, var(--color-emilia-night));
+  --theme-primary: var(--color-emilia-lilac-300);
+  --theme-primary-fill: var(--color-emilia-violet-500);
+  --theme-primary-soft: var(--color-emilia-lavender);
+  --theme-accent: var(--color-emilia-ice);
+  --theme-accent-fill: var(--color-emilia-ice-700);
+  --theme-accent-soft: color-mix(in oklab, var(--color-emilia-ice-700) 14%, var(--color-emilia-night-2));
+  --theme-button: var(--color-emilia-violet-500);
+  --theme-button-foreground: var(--color-emilia-night);
+  --theme-button-hover: var(--color-emilia-lilac-300);
+  --theme-secondary: transparent;
+  --theme-secondary-foreground: var(--color-emilia-lilac-300);
+  --theme-secondary-border: color-mix(in oklab, var(--color-emilia-lilac-300) 50%, transparent);
+  --theme-badge: color-mix(in oklab, var(--color-emilia-gem) 15%, var(--color-emilia-night));
+  --theme-badge-foreground: var(--color-emilia-gem);
+  --theme-badge-border: color-mix(in oklab, var(--color-emilia-gem) 40%, transparent);
+  --theme-focus: var(--color-emilia-lavender);
+}
+
+/* Rem theme (light). */
+[data-theme="rem"] {
+  color-scheme: light;
+  --theme-background: var(--color-rem-apron);
+  --theme-surface: var(--color-rem-mist);
+  --theme-border: var(--color-rem-hair-light);
+  --theme-header: var(--color-rem-dress);
+  --theme-header-foreground: var(--color-rem-apron);
+  --theme-header-accent: var(--color-rem-ribbon);
+  --theme-foreground: var(--color-rem-dress);
+  --theme-muted: var(--color-rem-gray);
+  --theme-primary: var(--color-rem-blue);
+  --theme-primary-fill: var(--color-rem-hair-shadow);
+  --theme-primary-soft: var(--color-rem-hair);
+  --theme-accent: var(--color-rem-ribbon-dark);
+  --theme-accent-fill: var(--color-rem-ribbon);
+  --theme-accent-soft: var(--color-rem-ribbon-light);
+  --theme-button: var(--color-rem-hair);
+  --theme-button-foreground: var(--color-rem-dress);
+  --theme-button-hover: var(--color-rem-hair-glow);
+  --theme-secondary: transparent;
+  --theme-secondary-foreground: var(--color-rem-blue);
+  --theme-secondary-border: var(--color-rem-hair-shadow);
+  --theme-badge: var(--color-rem-hair-light);
+  --theme-badge-foreground: var(--color-rem-dress);
+  --theme-badge-border: var(--color-rem-ribbon);
+  --theme-focus: var(--color-rem-ribbon);
+}
+
+/* Ram theme (light). */
+[data-theme="ram"] {
+  color-scheme: light;
+  --theme-background: var(--color-ram-apron);
+  --theme-surface: var(--color-ram-blush);
+  --theme-border: var(--color-ram-petal);
+  --theme-header: var(--color-ram-dress);
+  --theme-header-foreground: var(--color-ram-apron);
+  --theme-header-accent: var(--color-ram-ribbon);
+  --theme-foreground: var(--color-ram-dress);
+  --theme-muted: var(--color-ram-gray);
+  --theme-primary: var(--color-ram-pink);
+  --theme-primary-fill: var(--color-ram-hair-shadow);
+  --theme-primary-soft: var(--color-ram-hair);
+  --theme-accent: var(--color-ram-ribbon-dark);
+  --theme-accent-fill: var(--color-ram-ribbon);
+  --theme-accent-soft: var(--color-ram-ribbon-light);
+  --theme-button: var(--color-ram-pink);
+  --theme-button-foreground: var(--color-ram-apron);
+  --theme-button-hover: var(--color-ram-pink-dark);
+  --theme-secondary: transparent;
+  --theme-secondary-foreground: var(--color-ram-pink);
+  --theme-secondary-border: var(--color-ram-pink);
+  --theme-badge: var(--color-ram-hair);
+  --theme-badge-foreground: var(--color-ram-dress);
+  --theme-badge-border: var(--color-ram-ribbon);
+  --theme-focus: var(--color-ram-ribbon);
+}
+
+/* Subaru theme (light). Green and amber carry the same weight. */
+[data-theme="subaru"] {
+  color-scheme: light;
+  --theme-background: var(--color-subaru-tracksuit-white);
+  --theme-surface: var(--color-subaru-jacket-mist);
+  --theme-border: var(--color-subaru-stone);
+  --theme-header: var(--color-subaru-tracksuit-gray);
+  --theme-header-foreground: var(--color-subaru-tracksuit-white);
+  --theme-header-accent: var(--color-subaru-amber);
+  --theme-foreground: var(--color-subaru-cloak);
+  --theme-muted: var(--color-subaru-gray);
+  --theme-primary: var(--color-subaru-green);
+  --theme-primary-fill: var(--color-subaru-jacket);
+  --theme-primary-soft: var(--color-subaru-jacket-light);
+  --theme-accent: var(--color-subaru-amber-dark);
+  --theme-accent-fill: var(--color-subaru-amber);
+  --theme-accent-soft: var(--color-subaru-amber-light);
+  --theme-button: var(--color-subaru-green);
+  --theme-button-foreground: var(--color-subaru-tracksuit-white);
+  --theme-button-hover: var(--color-subaru-green-dark);
+  --theme-secondary: var(--color-subaru-amber);
+  --theme-secondary-foreground: var(--color-subaru-cloak);
+  --theme-secondary-border: var(--color-subaru-amber);
+  --theme-badge: var(--color-subaru-amber);
+  --theme-badge-foreground: var(--color-subaru-cloak);
+  --theme-badge-border: var(--color-subaru-amber-dark);
+  --theme-focus: var(--color-subaru-green);
+}

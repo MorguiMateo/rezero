@@ -1,0 +1,80 @@
+/* Raw character palettes. Components should not use these directly: use the
+   semantic tokens from themes.css (bg-background, text-primary, ...) so the
+   page can switch themes. Raw tokens are for theme definitions and swatches.
+   static: always emit the variables, even if no utility class uses them,
+   because themes.css reads them through var(). */
+
+/* Emilia (default, dark): silver hair, violet eyes, white and lilac dress,
+   the green gem on her collar and the ice of her magic. */
+@theme static {
+  --color-emilia-night: #120e1a;
+  --color-emilia-night-2: #1b1526;
+  --color-emilia-mauve-900: #554164;
+  --color-emilia-violet-700: #8a5aaf;
+  --color-emilia-violet-500: #a372c3;
+  --color-emilia-lilac-300: #c190df;
+  --color-emilia-lavender: #b59ef0;
+  --color-emilia-silver: #e2e2e2;
+  --color-emilia-snow: #fafafa;
+  --color-emilia-ice: #90bff9;
+  --color-emilia-ice-700: #649cc1;
+  --color-emilia-gem: #77cd8e;
+  --color-emilia-pale-gold: #f0dead;
+}
+
+/* Rem (light): light blue hair, white apron, black maid dress and the violet
+   hair ribbon. Hair tones sampled from the anime model sheet. */
+@theme static {
+  --color-rem-apron: #f6fafe;
+  --color-rem-mist: #e9f3fe;
+  --color-rem-hair-light: #cfe4fd;
+  --color-rem-hair: #91bffa;
+  --color-rem-hair-shadow: #7fb0f4;
+  --color-rem-hair-glow: #b5d5fc;
+  --color-rem-blue: #2a6cb8;
+  --color-rem-ribbon: #9265ab;
+  --color-rem-ribbon-dark: #7a4f9c;
+  --color-rem-ribbon-light: #f1e9f7;
+  --color-rem-dress: #2b2d36;
+  --color-rem-gray: #5a5f6e;
+}
+
+/* Ram (light): magenta pink hair, white apron, black maid dress and the
+   violet hair ribbon. */
+@theme static {
+  --color-ram-apron: #fdf6fa;
+  --color-ram-blush: #fce7f2;
+  --color-ram-petal: #f3d2e3;
+  --color-ram-hair: #f0a6cc;
+  --color-ram-hair-shadow: #e77fb8;
+  --color-ram-pink: #a8326f;
+  --color-ram-pink-dark: #7f2554;
+  --color-ram-ribbon: #9774cc;
+  --color-ram-ribbon-dark: #5e46a6;
+  --color-ram-ribbon-light: #efe9fa;
+  --color-ram-dress: #2f2c33;
+  --color-ram-gray: #625a63;
+}
+
+/* Subaru (light): green jacket from arc 6, amber scarf and tracksuit stripes,
+   white and grey of the original tracksuit, black cloak. */
+@theme static {
+  --color-subaru-tracksuit-white: #f7f7f5;
+  --color-subaru-tracksuit-gray: #3a393f;
+  --color-subaru-stone: #d9dcd8;
+  --color-subaru-jacket-mist: #e6f3ea;
+  --color-subaru-jacket-light: #9fd0ac;
+  --color-subaru-jacket: #4a9e64;
+  --color-subaru-green: #2d7044;
+  --color-subaru-green-dark: #1f4a2e;
+  --color-subaru-amber-light: #fdebcf;
+  --color-subaru-amber: #f5b25a;
+  --color-subaru-amber-dark: #8f5508;
+  --color-subaru-cloak: #2c2b30;
+  --color-subaru-gray: #5b5d63;
+}
+
+/* Shared by every theme. */
+@theme static {
+  --color-danger: #bd463e;
+}
