@@ -1,4 +1,5 @@
 import type { MetaFunction } from "react-router";
+import { getThemePortrait, themeNames, themes } from "@/lib/theme";
 
 // Temporary page to review the design system; delete once it is approved.
 export const meta: MetaFunction = () => [
@@ -180,10 +181,7 @@ function ThemePreview({ palette }: { palette: CharacterPalette }) {
           Entrar
         </span>
       </div>
-      <div className="flex h-1.5">
-        <div className="flex-1 bg-accent-fill" />
-        <div className="w-1/3 bg-primary-fill" />
-      </div>
+      <div className="h-1.5 bg-primary-fill" />
 
       <div className="p-8">
         <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-accent">
@@ -230,12 +228,12 @@ function ThemePreview({ palette }: { palette: CharacterPalette }) {
 
 export default function StyleGuide() {
   return (
-    <main className="mx-auto w-full max-w-6xl space-y-16 px-6 py-16">
+    <div className="mx-auto w-full max-w-6xl space-y-16 px-6 py-16">
       <header className="space-y-3 text-center">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted">
           Sección 0 · Design system
         </p>
-        <h1 className="font-display text-6xl font-medium silver-gradient-text">
+        <h1 className="font-display text-6xl font-medium title-gradient-text">
           Biblioteca de Pléyades
         </h1>
       </header>
@@ -268,6 +266,32 @@ export default function StyleGuide() {
       </section>
 
       <section>
+        <SectionTitle>Retratos del botón de tema</SectionTitle>
+        <div className="grid gap-6 sm:grid-cols-4">
+          {themes.map((theme) => (
+            <div key={theme} data-theme={theme} className="flex items-end gap-4 rounded-xl bg-header p-4">
+              <img
+                src={getThemePortrait(theme)}
+                alt={themeNames[theme]}
+                width={96}
+                height={96}
+                loading="lazy"
+                className="size-24 rounded-full ring-2 ring-header-accent"
+              />
+              <img
+                src={getThemePortrait(theme)}
+                alt=""
+                width={96}
+                height={96}
+                loading="lazy"
+                className="size-10 rounded-full ring-2 ring-header-accent"
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section>
         <SectionTitle>Tipografía</SectionTitle>
         <div className="space-y-8">
           {typefaces.map((typeface) => (
@@ -281,6 +305,6 @@ export default function StyleGuide() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   );
 }

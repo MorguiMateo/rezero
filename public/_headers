@@ -1,0 +1,4 @@
+# Cloudflare Static Assets headers. Files in /assets/ have content hashes, so
+# browsers can keep them (fonts, CSS, JS) without revalidating on every reload.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

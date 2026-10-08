@@ -29,18 +29,19 @@ pnpm build
 pnpm preview
 ```
 
-`typecheck` genera los tipos de rutas antes de ejecutar TypeScript. `build` genera HTML completo para `/` y `/estilos`, junto con JS, CSS y fuentes en `build/client`. `preview` sirve ese build con Wrangler en el runtime local de Cloudflare (por defecto `http://localhost:8787`); no publica nada ni requiere un deploy. Ejecutar de nuevo el build después de modificar código. `pnpm start` es un alias del preview local.
+`typecheck` genera los tipos de rutas antes de ejecutar TypeScript. `build` genera HTML completo para `/`, `/estilos`, `/novela`, `/manga` y cada obra, volumen y capítulo de `content/`, junto con JS, CSS y fuentes en `build/client`. `preview` sirve ese build con Wrangler en el runtime local de Cloudflare (por defecto `http://localhost:8787`); no publica nada ni requiere un deploy. Ejecutar de nuevo el build después de modificar código. `pnpm start` es un alias del preview local.
 
-Verificar ambas URLs, favicon y assets; una URL desconocida debe devolver HTTP 404, no la home. `wrangler.jsonc` desactiva el fallback SPA y normaliza URLs sin barra final. La navegación carga los módulos de ruta y, cuando existan loaders, sus archivos `.data` prerenderizados.
+Verificar esas URLs, `favicon.svg` y assets; una URL desconocida debe devolver HTTP 404, no la home. `wrangler.jsonc` desactiva el fallback SPA y normaliza URLs sin barra final. La navegación carga los módulos de ruta y, cuando existan loaders, sus archivos `.data` prerenderizados.
 
 La base migrada pasó lint, TypeScript, build y comprobación HTTP en Wrangler local: ambas páginas entregan su HTML prerenderizado completo, los 16 assets de interfaz responden correctamente y las rutas inexistentes devuelven 404. Esto no verifica un despliegue de producción ni sustituye una revisión visual/hidratación en navegador.
 
 ## Estructura
 
 - `src/root.tsx`: documento HTML, estilos globales e hidratación.
-- `src/routes.ts`: rutas; `src/routes/home.tsx` y `style-guide.tsx`: páginas y metadatos.
+- `src/routes.ts`: rutas; `src/routes/`: home, guía de estilos y `novel-work`, `novel-volume`, `novel-chapter`.
+- `src/lib/content/`: lectura de `content/` en build (YAML + Markdown → HTML); `src/lib/seo.ts`: metadatos compartidos.
 - `src/styles/`: paletas, temas semánticos y utilidades Tailwind.
-- `public/`: favicon y futuros assets de interfaz, nunca imágenes de capítulos.
+- `public/`: `favicon.svg` y futuros assets de interfaz, nunca imágenes de capítulos.
 - `react-router.config.ts`: `ssr: false`, URLs de prerender y manifiesto de rutas inicial.
 - `vite.config.ts`: plugins React Router y Tailwind.
 - `wrangler.jsonc`: hosting de `build/client` como Static Assets.
@@ -49,9 +50,9 @@ Las cuatro fuentes se empaquetan localmente con Fontsource, sin requests a Googl
 
 ## Estado y siguientes pasos
 
-Implementado: home provisional, guía de estilos temporal (noindex), cuatro temas y base de build estático/preview local. No hay catálogo, capítulos, lectores funcionales, integración de contenido ni deploy de producción. Cuentas, progreso, favoritos y preferencias guardadas (salvo el tema) están fuera de alcance.
+Implementado: home provisional, guía de estilos temporal (noindex), cuatro temas y base de build estático/preview local. Recorrido de novela obra → volumen → capítulo prerenderizado desde `content/` (con contenido de ejemplo). No hay catálogo, lector de manga, conversión de EPUB ni deploy de producción. Cuentas, progreso, favoritos y preferencias guardadas (salvo el tema) están fuera de alcance.
 
-El siguiente paso es crear el repo privado de contenido y montarlo como submódulo en `content/` (novelas en Markdown con frontmatter), luego implementar obra → volumen → capítulo y enumerar todas sus URLs en `prerender`. No hay backend. Las imágenes de contenido se optimizarán en build y servirán desde R2 con dominio propio.
+El siguiente paso es el script de conversión EPUB → Markdown con la primera novela real y el bucket R2 para sus ilustraciones. No hay backend. Las imágenes de contenido se optimizarán en build y servirán desde R2 con dominio propio.
 
 La guía de Cloudflare advierte que su plugin Vite no admite prerender de React Router; por eso este proyecto utiliza Vite para build y Wrangler para Static Assets, sin `@cloudflare/vite-plugin`.
 

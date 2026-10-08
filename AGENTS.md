@@ -29,7 +29,7 @@ Estático, siempre pre-renderizado:
 - Home, catálogo, obra e índice de volúmenes.
 - Cada capítulo de novela.
 - Carcasa del lector de manga: título, navegación y lista de páginas.
-- Créditos y páginas informativas.
+- Página 404 propia. No hay pie de página, créditos ni sección de proyectos.
 
 Dinámico, solo en el cliente:
 
@@ -49,11 +49,12 @@ Reglas:
 ## 2. Rutas: segmentos, no query params
 
 - Identidad del contenido en el path:
-  - `/novela/:obra`
-  - `/novela/:obra/:volumen`
-  - `/novela/:obra/:volumen/:capitulo`
-  - `/manga/:obra/:tomo/:capitulo`
-- Declarar rutas en `src/routes.ts`. Registrar **cada URL existente** en `prerender`, usando una función asíncrona para enumerar slugs desde `src/lib/content/` cuando exista esa capa. `prerender: true` solo enumera rutas sin parámetros.
+  - `/novela/:work` (obra)
+  - `/novela/:work/:volume` (volumen)
+  - `/novela/:work/:volume/:chapter` (capítulo)
+  - `/manga/:work/:volume/:chapter` (obra, tomo, capítulo)
+- Los slugs son los nombres de carpeta y archivo de `content/` (minúsculas, dígitos y guiones), por ejemplo `/novela/re-zero/volumen-01/capitulo-01`.
+- Declarar rutas en `src/routes.ts`. Registrar **cada URL existente** en `prerender`: `react-router.config.ts` las enumera con `getNovelPaths()` de `src/lib/content/`. `prerender: true` solo enumera rutas sin parámetros.
 - No usar query params para decidir qué contenido se carga en un loader de build. Reservarlos para filtros, orden o pestañas de UI con `useSearchParams` en el cliente.
 - Slugs inexistentes deben devolver HTTP 404. Mantener `assets.not_found_handling: "none"`; no configurar fallback SPA ni una redirección comodín a `index.html` o `__spa-fallback.html`.
 - Mantener `routeDiscovery: { mode: "initial" }` para no depender de un endpoint de manifiesto de rutas en runtime.
@@ -65,7 +66,7 @@ Reglas:
 - Imágenes de contenido ya optimizadas en R2, en `.webp` y tamaños necesarios.
 - Páginas de manga con `width`, `height`, `loading="lazy"` y `decoding="async"`; primeras 1–2 páginas con prioridad (`fetchPriority="high"`, sin lazy loading).
 - Servir desde dominio propio del bucket, nunca `*.r2.dev` en producción.
-- No guardar imágenes de capítulos en `public/` ni en el repositorio. `public/` solo contiene logo, favicon, iconos y assets de interfaz; las fuentes se empaquetan desde Fontsource.
+- No guardar imágenes de capítulos en `public/` ni en el repositorio. `public/` solo contiene `favicon.svg`, `_headers`, los iconos de personajes del botón de tema (`characters/*.webp`) y otros assets de interfaz; el logo es SVG en línea en `src/components/`; las fuentes se empaquetan desde Fontsource.
 
 ## 4. Contenido fuera del bundle
 
@@ -80,9 +81,9 @@ Reglas:
 
 - Las novelas descargadas (normalmente EPUB, que por dentro es XHTML + imágenes) se convierten una sola vez a este formato, por ejemplo con `pandoc`, limpiando clases y estilos del editor. El build no parsea EPUB.
 - Convenciones Markdown: cursiva para énfasis y pensamientos, `***` para cambios de escena, `[^n]` para notas del traductor, `![alt](ruta)` para ilustraciones. No usar MDX ni HTML crudo dentro del Markdown.
-- Las ilustraciones no viven en `content/`: siguen el flujo de imágenes (WebP en R2). El Markdown guarda una ruta relativa al bucket y el script de conversión genera un manifiesto con `width`/`height` de cada imagen para que el build las emita en cada `<img>`.
+- Las ilustraciones no viven en `content/`: siguen el flujo de imágenes (WebP en R2). El Markdown guarda una ruta relativa al bucket (`re-zero/v01/ilust-03.webp`) y `content/images.json` mapea cada ruta a `{ "width", "height" }`. El build antepone `CONTENT_IMAGES_URL` (dominio R2) y añade `width`, `height`, `loading="lazy"` y `decoding="async"`. Falla si una imagen no está en el manifiesto, si falta la variable o si la imagen es una URL externa.
 - El Markdown se convierte a HTML en el `loader` de build (por ejemplo con `remark`/`rehype`); el parser no debe llegar al bundle del cliente.
-- Acceso único mediante `src/lib/content/`, con funciones en inglés y camelCase como `getWorks()`, `getVolumes(work)` y `getChapter(work, volume, chapter)`. Las rutas no leen `content/` directamente.
+- Acceso único mediante `src/lib/content/novels.server.ts`: `getWorks()`, `getWork(work)`, `getVolume(work, volume)`, `getChapter(work, volume, chapter)` y `getNovelPaths()`. Valida los YAML y frontmatter y falla el build ante datos inválidos, números repetidos o el submódulo sin inicializar. Las rutas no leen `content/` directamente.
 - Separar acceso exclusivo de build en módulos `.server.ts` cuando corresponda; ningún secreto debe entrar al bundle cliente ni a datos serializados.
 - HTML y archivos `.data` prerenderizados son salida pública del build, no una base de datos privada.
 - Código exclusivo de build puede usar APIs de Node (`fs`) para leer `content/`.
@@ -101,7 +102,7 @@ Después de cambios de rutas, root o datos:
 
 - Ejecutar `pnpm lint`, `pnpm typecheck` y `pnpm build`.
 - Revisar el output y los HTML de `build/client`: cada ruta de contenido debe tener su documento completo, no solo una carcasa para JavaScript.
-- Ejecutar `pnpm preview` (Wrangler local) y comprobar rutas conocidas, CSS/JS/fuentes/favicon y HTTP 404 de una ruta inexistente. `pnpm dev` no sustituye esta verificación.
+- Ejecutar `pnpm preview` (Wrangler local) y comprobar rutas conocidas, CSS/JS/fuentes/`favicon.svg` y HTTP 404 de una ruta inexistente. `pnpm dev` no sustituye esta verificación.
 - Comprobar archivos `.data` cuando haya loaders y navegación cliente; detener los servidores iniciados durante la verificación.
 
 ## Ante la duda

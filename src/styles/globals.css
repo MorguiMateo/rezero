@@ -2,7 +2,10 @@
 @import "./palettes.css";
 @import "./themes.css";
 
-@import "./fonts.css";
+/* Match the theme chosen on <html>; Emilia is the default without a variant. */
+@custom-variant theme-rem (&:where([data-theme="rem"] *));
+@custom-variant theme-ram (&:where([data-theme="ram"] *));
+@custom-variant theme-subaru (&:where([data-theme="subaru"] *));
 
 @theme {
   --font-display: "Cormorant Variable", Georgia, serif;
@@ -11,15 +14,9 @@
   --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
 }
 
-/* Emilia's silver-to-violet gradient for display titles. */
-@utility silver-gradient-text {
-  background-image: linear-gradient(
-    175deg,
-    var(--color-emilia-snow) 0%,
-    var(--color-emilia-silver) 30%,
-    var(--color-emilia-lilac-300) 70%,
-    var(--color-emilia-violet-500) 100%
-  );
+/* Display title gradient in the active character's colors (see themes.css). */
+@utility title-gradient-text {
+  background-image: var(--theme-title-gradient);
   background-clip: text;
   color: transparent;
 }
@@ -38,5 +35,82 @@
   :focus-visible {
     outline: 2px solid var(--color-focus);
     outline-offset: 3px;
+  }
+}
+
+/* Keep the old theme intact while a circular mask reveals the new snapshot. */
+html[data-theme-transition]::view-transition-group(root),
+html[data-theme-transition]::view-transition-old(root),
+html[data-theme-transition]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+html[data-theme-transition]::view-transition-old(root) {
+  z-index: 1;
+}
+
+html[data-theme-transition]::view-transition-new(root) {
+  z-index: 2;
+}
+
+html[data-theme-transition]::view-transition {
+  pointer-events: none;
+}
+
+/* Reading typography for chapter HTML rendered from Markdown at build time. */
+@utility chapter-prose {
+  font-family: var(--font-reading);
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--color-foreground);
+
+  & p {
+    margin-block: 1em;
+  }
+
+  & a {
+    color: var(--color-primary);
+  }
+
+  /* Scene breaks (*** in Markdown). */
+  & hr {
+    height: auto;
+    overflow: visible;
+    border: 0;
+    margin-block: 2.5em;
+    text-align: center;
+  }
+
+  & hr::after {
+    content: "◆ ◆ ◆";
+    color: var(--color-muted);
+    letter-spacing: 0.5em;
+  }
+
+  & img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 2em auto;
+  }
+
+  & sup {
+    line-height: 0;
+  }
+
+  & .footnotes {
+    margin-top: 3em;
+    padding-top: 1em;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.9em;
+    color: var(--color-muted);
+  }
+
+  & .footnotes h2 {
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
   }
 }

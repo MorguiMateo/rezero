@@ -58,6 +58,7 @@
   --theme-badge-foreground: var(--color-emilia-gem);
   --theme-badge-border: color-mix(in oklab, var(--color-emilia-gem) 40%, transparent);
   --theme-focus: var(--color-emilia-lavender);
+  --theme-title-gradient: linear-gradient(175deg, var(--color-emilia-snow) 0%, var(--color-emilia-silver) 30%, var(--color-emilia-lilac-300) 70%, var(--color-emilia-violet-500) 100%);
 }
 
 /* Rem theme (light). */
@@ -68,7 +69,7 @@
   --theme-border: var(--color-rem-hair-light);
   --theme-header: var(--color-rem-dress);
   --theme-header-foreground: var(--color-rem-apron);
-  --theme-header-accent: var(--color-rem-ribbon);
+  --theme-header-accent: var(--color-rem-hair);
   --theme-foreground: var(--color-rem-dress);
   --theme-muted: var(--color-rem-gray);
   --theme-primary: var(--color-rem-blue);
@@ -87,6 +88,7 @@
   --theme-badge-foreground: var(--color-rem-dress);
   --theme-badge-border: var(--color-rem-ribbon);
   --theme-focus: var(--color-rem-ribbon);
+  --theme-title-gradient: linear-gradient(175deg, var(--color-rem-dress) 0%, var(--color-rem-blue) 55%, var(--color-rem-hair-shadow) 100%);
 }
 
 /* Ram theme (light). */
@@ -97,7 +99,7 @@
   --theme-border: var(--color-ram-petal);
   --theme-header: var(--color-ram-dress);
   --theme-header-foreground: var(--color-ram-apron);
-  --theme-header-accent: var(--color-ram-ribbon);
+  --theme-header-accent: var(--color-ram-hair);
   --theme-foreground: var(--color-ram-dress);
   --theme-muted: var(--color-ram-gray);
   --theme-primary: var(--color-ram-pink);
@@ -116,6 +118,7 @@
   --theme-badge-foreground: var(--color-ram-dress);
   --theme-badge-border: var(--color-ram-ribbon);
   --theme-focus: var(--color-ram-ribbon);
+  --theme-title-gradient: linear-gradient(175deg, var(--color-ram-dress) 0%, var(--color-ram-pink) 55%, var(--color-ram-hair-shadow) 100%);
 }
 
 /* Subaru theme (light). Green and amber carry the same weight. */
@@ -145,4 +148,5 @@
   --theme-badge-foreground: var(--color-subaru-cloak);
   --theme-badge-border: var(--color-subaru-amber-dark);
   --theme-focus: var(--color-subaru-green);
+  --theme-title-gradient: linear-gradient(175deg, var(--color-subaru-cloak) 0%, var(--color-subaru-green) 55%, var(--color-subaru-jacket) 100%);
 }
