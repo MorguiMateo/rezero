@@ -118,3 +118,9 @@ html[data-theme-transition]::view-transition {
     text-transform: uppercase;
   }
 }
+
+/* Current character's portrait (see --theme-portrait in themes.css). The images
+   are inlined into the stylesheet, so they are there on first paint. */
+@utility theme-portrait {
+  background: center / cover no-repeat var(--theme-portrait);
+}

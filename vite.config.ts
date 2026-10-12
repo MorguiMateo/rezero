@@ -43,6 +43,11 @@ function contentImages(): Plugin {
 
 export default defineConfig({
   plugins: [tailwindcss(), reactRouter(), contentImages()],
+  build: {
+    // Theme portraits (about 24 KB in total) go inside the stylesheet so the
+    // theme button never shows an empty circle while its image loads.
+    assetsInlineLimit: (file) => (file.includes("/src/assets/characters/") ? true : undefined),
+  },
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
   },

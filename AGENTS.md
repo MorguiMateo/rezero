@@ -69,7 +69,7 @@ Reglas:
 - Páginas de manga con `width`, `height`, `loading="lazy"` y `decoding="async"`; primeras 1–2 páginas con prioridad (`fetchPriority="high"`, sin lazy loading).
 - Novela: `content/images/` se sirve en `/img/` (en dev con un middleware de `vite.config.ts`; en el build se copia a `build/client/img/`). `public/_headers` les da caché de un día porque su URL no cambia al reemplazarlas.
 - Manga: las páginas no van en ningún repositorio. Se suben con `wrangler deploy` a proyectos de Workers solo de assets (sin script), fuera de este sitio. No usar `*.r2.dev` ni enlazar imágenes de sitios ajenos (hotlinking).
-- No guardar imágenes de contenido en `public/` ni en el repositorio de la app. `public/` solo contiene `favicon.svg`, `_headers`, los iconos de personajes del botón de tema (`characters/*.webp`) y otros assets de interfaz; el logo es SVG en línea en `src/components/`; las fuentes se empaquetan desde Fontsource.
+- No guardar imágenes de contenido en `public/` ni en el repositorio de la app. `public/` solo contiene `favicon.svg`, `_headers` y otros assets de interfaz; los retratos del botón de tema están en `src/assets/characters/*.webp` y se incrustan en el CSS (variable `--theme-portrait` de cada tema, utilidad `theme-portrait`) para que aparezcan en el primer pintado; el logo es SVG en línea en `src/components/`; las fuentes se empaquetan desde Fontsource.
 
 ## 4. Contenido fuera del bundle
 

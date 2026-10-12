@@ -34,6 +34,7 @@
 :root,
 [data-theme="satella"] {
   color-scheme: dark;
+  --theme-portrait: url("../assets/characters/satella.webp");
   --theme-background: var(--color-satella-night);
   --theme-surface: var(--color-satella-night-2);
   --theme-border: var(--color-satella-mauve-900);
@@ -65,6 +66,7 @@
    the lilac of her hood. */
 [data-theme="emilia"] {
   color-scheme: light;
+  --theme-portrait: url("../assets/characters/emilia.webp");
   --theme-background: var(--color-emilia-snow);
   --theme-surface: var(--color-emilia-frost);
   --theme-border: var(--color-emilia-lilac-200);
@@ -95,6 +97,7 @@
 /* Shaula theme (dark). Orange trim on black, rose hair as the second color. */
 [data-theme="shaula"] {
   color-scheme: dark;
+  --theme-portrait: url("../assets/characters/shaula.webp");
   --theme-background: var(--color-shaula-night);
   --theme-surface: var(--color-shaula-night-2);
   --theme-border: var(--color-shaula-hair-dark);
@@ -125,6 +128,7 @@
 /* Rem theme (light). */
 [data-theme="rem"] {
   color-scheme: light;
+  --theme-portrait: url("../assets/characters/rem.webp");
   --theme-background: var(--color-rem-apron);
   --theme-surface: var(--color-rem-mist);
   --theme-border: var(--color-rem-hair);
@@ -156,6 +160,7 @@
    second color, blue eyes mark new chapters. */
 [data-theme="beatrice"] {
   color-scheme: dark;
+  --theme-portrait: url("../assets/characters/beatrice.webp");
   --theme-background: var(--color-beatrice-library);
   --theme-surface: var(--color-beatrice-library-2);
   --theme-border: var(--color-beatrice-shelf);
@@ -186,6 +191,7 @@
 /* Echidna theme (dark). Black and white, with jade as the only color. */
 [data-theme="echidna"] {
   color-scheme: dark;
+  --theme-portrait: url("../assets/characters/echidna.webp");
   --theme-background: var(--color-echidna-black);
   --theme-surface: var(--color-echidna-dress);
   --theme-border: var(--color-echidna-charcoal);
@@ -216,6 +222,7 @@
 /* Ram theme (light). */
 [data-theme="ram"] {
   color-scheme: light;
+  --theme-portrait: url("../assets/characters/ram.webp");
   --theme-background: var(--color-ram-apron);
   --theme-surface: var(--color-ram-blush);
   --theme-border: var(--color-ram-hair);
@@ -246,6 +253,7 @@
 /* Subaru theme (light). Green and amber carry the same weight. */
 [data-theme="subaru"] {
   color-scheme: light;
+  --theme-portrait: url("../assets/characters/subaru.webp");
   --theme-background: var(--color-subaru-tracksuit-white);
   --theme-surface: var(--color-subaru-jacket-mist);
   --theme-border: var(--color-subaru-jacket-light);

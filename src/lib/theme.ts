@@ -20,11 +20,6 @@ export const themeNames: Record<Theme, string> = {
   subaru: "Subaru",
 };
 
-// Character icons for the theme button: 96×96 WebP in public/characters/.
-export function getThemePortrait(theme: Theme) {
-  return `/characters/${theme}.webp`;
-}
-
 export function isTheme(value: unknown): value is Theme {
   return typeof value === "string" && (themes as readonly string[]).includes(value);
 }

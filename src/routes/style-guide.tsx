@@ -1,5 +1,5 @@
 import type { MetaFunction } from "react-router";
-import { getThemePortrait, themeNames, themes, type Theme } from "@/lib/theme";
+import { themeNames, themes, type Theme } from "@/lib/theme";
 
 // Temporary page to review the design system; delete once it is approved.
 export const meta: MetaFunction = () => [
@@ -355,22 +355,12 @@ export default function StyleGuide() {
         <div className="grid gap-6 sm:grid-cols-4">
           {themes.map((theme) => (
             <div key={theme} data-theme={theme} className="flex items-end gap-4 rounded-xl bg-header p-4">
-              <img
-                src={getThemePortrait(theme)}
-                alt={themeNames[theme]}
-                width={96}
-                height={96}
-                loading="lazy"
-                className="size-24 rounded-full ring-2 ring-header-accent"
+              <span
+                role="img"
+                aria-label={themeNames[theme]}
+                className="block size-24 rounded-full ring-2 ring-header-accent theme-portrait"
               />
-              <img
-                src={getThemePortrait(theme)}
-                alt=""
-                width={96}
-                height={96}
-                loading="lazy"
-                className="size-10 rounded-full ring-2 ring-header-accent"
-              />
+              <span aria-hidden="true" className="block size-10 rounded-full ring-2 ring-header-accent theme-portrait" />
             </div>
           ))}
         </div>
