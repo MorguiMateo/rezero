@@ -45,11 +45,14 @@ export function BookCover({
   caption,
   tone,
   image,
+  eager = false,
 }: {
   title: string;
   caption: string;
   tone: CoverTone;
   image: ContentImage | null;
+  // Covers visible on first load skip lazy loading so they do not pop in late.
+  eager?: boolean;
 }) {
   return (
     <div className="relative aspect-[2/3] w-full">
@@ -64,7 +67,7 @@ export function BookCover({
             width={image.width}
             height={image.height}
             alt={title}
-            loading="lazy"
+            loading={eager ? "eager" : "lazy"}
             decoding="async"
             className="absolute inset-0 size-full object-cover"
           />

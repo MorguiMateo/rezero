@@ -1,4 +1,6 @@
 import { data, Link } from "react-router";
+import literataFont from "@fontsource-variable/literata/files/literata-latin-wght-normal.woff2?url";
+import { fontPreload } from "@/lib/font-preload";
 import { getWork } from "@/lib/content/novels.server";
 import { buildMeta } from "@/lib/seo";
 import type { Route } from "./+types/novel-work";
@@ -8,6 +10,9 @@ export async function loader({ params }: Route.LoaderArgs) {
   if (!work) throw data(null, { status: 404 });
   return { work };
 }
+
+// The description is set in Literata, so it loads with the page instead of swapping in later.
+export const links: Route.LinksFunction = () => [fontPreload(literataFont)];
 
 export function meta({ loaderData }: Route.MetaArgs) {
   if (!loaderData) return [];

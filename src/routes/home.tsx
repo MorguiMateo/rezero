@@ -1,9 +1,12 @@
 import type { ReactNode } from "react";
 import type { MetaFunction } from "react-router";
 import { Link } from "react-router";
+import jetbrainsMonoFont from "@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url";
+import literataFont from "@fontsource-variable/literata/files/literata-latin-wght-normal.woff2?url";
 import { BookCover, coverTones } from "@/components/book-cover";
 import { Carousel } from "@/components/carousel";
 import { PleiadesMark } from "@/components/pleiades-mark";
+import { fontPreload } from "@/lib/font-preload";
 import { getWorks } from "@/lib/content/novels.server";
 import type { Route } from "./+types/home";
 
@@ -11,6 +14,10 @@ export const meta: MetaFunction = () => [
   { title: "Biblioteca de Pléyades · Re:Zero en español" },
   { name: "description", content: "Lee la novela ligera y el manga de Re:Zero en español." },
 ];
+
+// The intro paragraph (Literata) and the small labels (JetBrains Mono) are above
+// the fold, so their fonts load with the page instead of swapping in later.
+export const links: Route.LinksFunction = () => [fontPreload(literataFont), fontPreload(jetbrainsMonoFont)];
 
 export async function loader() {
   return { works: await getWorks() };
@@ -114,6 +121,7 @@ export default function Home({ loaderData: { works } }: Route.ComponentProps) {
                     caption={`${work.volumeCount} ${work.volumeCount === 1 ? "volumen" : "volúmenes"}`}
                     tone={coverTones[index % coverTones.length]}
                     image={work.cover}
+                    eager
                   />
                 </Link>
               </li>
