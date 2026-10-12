@@ -17,9 +17,11 @@ Este proyecto es un lector de novela ligera y manga. El contenido se pre-renderi
 - `react-router.config.ts` usa `ssr: false` y `prerender`; esto desactiva SSR en tiempo de request, no el renderizado de HTML durante el build.
 - Despliegue previsto en Cloudflare Workers Static Assets, servido desde `build/client` mediante `wrangler.jsonc`. No hay Worker SSR ni backend, y no está previsto.
 - No agregar `@cloudflare/vite-plugin` a esta configuración: actualmente no admite el prerender de React Router. No añadir backend sin preguntar.
-- Contenido (capítulos, metadatos): las novelas se descargan una vez y se convierten a Markdown (ver sección 4). No se hace `fetch` a una fuente externa durante el build; `src/lib/content/` lee los archivos locales con APIs de Node. `content/` es el submódulo git del repositorio privado `MorguiMateo/rezero-content`: el repo de la app solo guarda el puntero al commit, nunca el texto de las novelas. Los cambios de contenido se commitean en el submódulo y luego se actualiza el puntero en este repo. Un futuro CI clona el submódulo con un token de solo lectura.
-- Imágenes: descargar, convertir a `.webp` y subir a un bucket R2 propio. Servir desde un dominio propio conectado al bucket. **PENDIENTE:** dominio y bucket; el dominio debe estar agregado como zona en la misma cuenta de Cloudflare.
-- Caché de páginas: Static Assets, sin ISR. Nuevos capítulos: commitearlos en `content/`, actualizar el puntero del submódulo y hacer rebuild + deploy (manual o automatizado con GitHub Actions).
+- Contenido (capítulos, metadatos): las novelas se descargan una vez y se convierten a Markdown (ver sección 4). No se hace `fetch` a una fuente externa durante el build; `src/lib/content/` lee los archivos locales con APIs de Node. `content/` es el submódulo git del repositorio privado `MorguiMateo/rezero-content`: el repo de la app solo guarda el puntero al commit, nunca el texto de las novelas. Los cambios de contenido se commitean en el submódulo y luego se actualiza el puntero en este repo. El CI (`.github/workflows/deploy.yml`) clona el submódulo con un token de solo lectura (`CONTENT_REPO_TOKEN`), verifica y publica `main` con `wrangler deploy`.
+- Hosting gratuito: el sitio se publica en el subdominio `*.workers.dev` de Cloudflare; no hay dominio propio ni gastos.
+- Imágenes de novela (portadas e ilustraciones): descargar, convertir a `.webp` y guardarlas en `content/images/` (repo privado de contenido). El build las publica con el sitio bajo `/img/` como assets estáticos (mismo dominio, CDN de Cloudflare, peticiones gratis e ilimitadas).
+- Páginas de manga: demasiadas para el repo y para el límite de archivos del sitio (20.000 por versión en Workers Free). **PENDIENTE:** se servirán desde uno o más proyectos de Workers aparte, solo con assets estáticos, cada uno en su `*.workers.dev`; ver sección 3.
+- Caché de páginas: Static Assets, sin ISR. Nuevos capítulos: commitearlos en `content/`, actualizar el puntero del submódulo y hacer rebuild + deploy (automático con GitHub Actions al hacer push a `main`).
 - Empezar con Workers Free mientras alcance; revisar los límites vigentes de cantidad y tamaño de assets antes de añadir dependencias pesadas o muchas rutas.
 
 ## 1. Qué es estático y qué es dinámico
@@ -63,10 +65,11 @@ Reglas:
 ## 3. Imágenes
 
 - Usar `<img>` o `<picture>`, sin optimización de imágenes en runtime. No activar Cloudflare Images sin preguntar.
-- Imágenes de contenido ya optimizadas en R2, en `.webp` y tamaños necesarios.
+- Imágenes de contenido ya optimizadas, en `.webp` y tamaños necesarios.
 - Páginas de manga con `width`, `height`, `loading="lazy"` y `decoding="async"`; primeras 1–2 páginas con prioridad (`fetchPriority="high"`, sin lazy loading).
-- Servir desde dominio propio del bucket, nunca `*.r2.dev` en producción.
-- No guardar imágenes de capítulos en `public/` ni en el repositorio. `public/` solo contiene `favicon.svg`, `_headers`, los iconos de personajes del botón de tema (`characters/*.webp`) y otros assets de interfaz; el logo es SVG en línea en `src/components/`; las fuentes se empaquetan desde Fontsource.
+- Novela: `content/images/` se sirve en `/img/` (en dev con un middleware de `vite.config.ts`; en el build se copia a `build/client/img/`). `public/_headers` les da caché de un día porque su URL no cambia al reemplazarlas.
+- Manga: las páginas no van en ningún repositorio. Se suben con `wrangler deploy` a proyectos de Workers solo de assets (sin script), fuera de este sitio. No usar `*.r2.dev` ni enlazar imágenes de sitios ajenos (hotlinking).
+- No guardar imágenes de contenido en `public/` ni en el repositorio de la app. `public/` solo contiene `favicon.svg`, `_headers`, los iconos de personajes del botón de tema (`characters/*.webp`) y otros assets de interfaz; el logo es SVG en línea en `src/components/`; las fuentes se empaquetan desde Fontsource.
 
 ## 4. Contenido fuera del bundle
 
@@ -79,9 +82,10 @@ Reglas:
   content/novela/<obra>/<volumen>/<capitulo>.md
   ```
 
+- `work.yaml` admite dos campos opcionales: `label` (etiqueta sobre el libro en el inicio: «Principal», «Precuela»…) y `cover` (ruta de la portada dentro de `content/images/`, con la misma validación que las ilustraciones). Sin `cover`, el inicio dibuja una portada genérica con los colores del tema.
 - Las novelas descargadas (normalmente EPUB, que por dentro es XHTML + imágenes) se convierten una sola vez a este formato, por ejemplo con `pandoc`, limpiando clases y estilos del editor. El build no parsea EPUB.
 - Convenciones Markdown: cursiva para énfasis y pensamientos, `***` para cambios de escena, `[^n]` para notas del traductor, `![alt](ruta)` para ilustraciones. No usar MDX ni HTML crudo dentro del Markdown.
-- Las ilustraciones no viven en `content/`: siguen el flujo de imágenes (WebP en R2). El Markdown guarda una ruta relativa al bucket (`re-zero/v01/ilust-03.webp`) y `content/images.json` mapea cada ruta a `{ "width", "height" }`. El build antepone `CONTENT_IMAGES_URL` (dominio R2) y añade `width`, `height`, `loading="lazy"` y `decoding="async"`. Falla si una imagen no está en el manifiesto, si falta la variable o si la imagen es una URL externa.
+- Las ilustraciones viven en `content/images/` como WebP. El Markdown guarda una ruta relativa a esa carpeta (`re-zero/v01/ilust-03.webp`) y `content/images.json` mapea cada ruta a `{ "width", "height" }`. El build antepone `/img/` y añade `width`, `height`, `loading="lazy"` y `decoding="async"`. Falla si el archivo no existe, si no está en el manifiesto o si la imagen es una URL externa.
 - El Markdown se convierte a HTML en el `loader` de build (por ejemplo con `remark`/`rehype`); el parser no debe llegar al bundle del cliente.
 - Acceso único mediante `src/lib/content/novels.server.ts`: `getWorks()`, `getWork(work)`, `getVolume(work, volume)`, `getChapter(work, volume, chapter)` y `getNovelPaths()`. Valida los YAML y frontmatter y falla el build ante datos inválidos, números repetidos o el submódulo sin inicializar. Las rutas no leen `content/` directamente.
 - Separar acceso exclusivo de build en módulos `.server.ts` cuando corresponda; ningún secreto debe entrar al bundle cliente ni a datos serializados.
@@ -92,7 +96,7 @@ Reglas:
 ## 5. Publicación de capítulos
 
 - Contenido nuevo o corregido requiere build + deploy; no hay ISR ni invalidación on-demand.
-- El proceso debe convertir las novelas nuevas a Markdown, subir sus imágenes a R2, enumerar todas las rutas y publicar los assets generados.
+- El proceso debe convertir las novelas nuevas a Markdown, guardar sus imágenes en `content/images/`, enumerar todas las rutas y publicar los assets generados.
 - No desplegar un bundle de servidor ni sustituir páginas ausentes con SSR por request.
 - Un cambio a caché dinámica/ISR exige una decisión de arquitectura explícita, fuera de esta base estática.
 

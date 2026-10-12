@@ -1,10 +1,22 @@
 // Serializable shapes returned by the content layer to route loaders.
 
+// A published content image, with its pixel size to reserve space while it loads.
+export type ContentImage = {
+  src: string;
+  width: number;
+  height: number;
+};
+
 export type WorkSummary = {
   slug: string;
   title: string;
   author: string;
   description: string;
+  // Short tag shown above the book on the home page ("Principal", "Precuela"...).
+  label: string | null;
+  // Without a cover, the home page draws a generic one in the theme colors.
+  cover: ContentImage | null;
+  volumeCount: number;
 };
 
 export type VolumeSummary = {

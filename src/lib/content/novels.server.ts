@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
+import { resolveContentImage } from "./images.server";
 import { renderMarkdown } from "./markdown.server";
 import type {
   ChapterDetail,
@@ -22,7 +23,7 @@ const frontmatterPattern = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
 
 type ChapterEntry = ChapterSummary & { file: string };
 type VolumeEntry = VolumeSummary & { chapters: ChapterEntry[] };
-type WorkEntry = WorkSummary & { volumes: VolumeEntry[] };
+type WorkEntry = Omit<WorkSummary, "volumeCount"> & { volumes: VolumeEntry[] };
 
 type YamlRecord = Record<string, unknown>;
 
@@ -32,6 +33,11 @@ function requireString(data: YamlRecord, key: string, file: string): string {
     throw new Error(`${file}: "${key}" must be a non-empty string.`);
   }
   return value;
+}
+
+function optionalString(data: YamlRecord, key: string, file: string): string | null {
+  if (data[key] === undefined) return null;
+  return requireString(data, key, file);
 }
 
 function requireNumber(data: YamlRecord, key: string, file: string): number {
@@ -115,11 +121,14 @@ async function readWork(slug: string): Promise<WorkEntry> {
   const volumes = await Promise.all(
     (await listDirectories(directory)).map((volumeSlug) => readVolume(directory, volumeSlug)),
   );
+  const coverPath = optionalString(data, "cover", file);
   return {
     slug,
     title: requireString(data, "title", file),
     author: requireString(data, "author", file),
     description: requireString(data, "description", file),
+    label: optionalString(data, "label", file),
+    cover: coverPath ? await resolveContentImage(coverPath, file) : null,
     volumes: sortByNumber(volumes, directory),
   };
 }
@@ -144,8 +153,8 @@ function loadCatalog(): Promise<WorkEntry[]> {
   return catalogPromise;
 }
 
-function toWorkSummary({ slug, title, author, description }: WorkEntry): WorkSummary {
-  return { slug, title, author, description };
+function toWorkSummary({ volumes, ...work }: WorkEntry): WorkSummary {
+  return { ...work, volumeCount: volumes.length };
 }
 
 function toVolumeSummary({ slug, title, number }: VolumeEntry): VolumeSummary {

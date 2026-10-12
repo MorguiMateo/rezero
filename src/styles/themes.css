@@ -127,7 +127,7 @@
   color-scheme: light;
   --theme-background: var(--color-rem-apron);
   --theme-surface: var(--color-rem-mist);
-  --theme-border: var(--color-rem-hair-light);
+  --theme-border: var(--color-rem-hair);
   --theme-header: var(--color-rem-dress);
   --theme-header-foreground: var(--color-rem-apron);
   --theme-header-accent: var(--color-rem-hair);
@@ -218,7 +218,7 @@
   color-scheme: light;
   --theme-background: var(--color-ram-apron);
   --theme-surface: var(--color-ram-blush);
-  --theme-border: var(--color-ram-petal);
+  --theme-border: var(--color-ram-hair);
   --theme-header: var(--color-ram-dress);
   --theme-header-foreground: var(--color-ram-apron);
   --theme-header-accent: var(--color-ram-hair);
@@ -248,7 +248,7 @@
   color-scheme: light;
   --theme-background: var(--color-subaru-tracksuit-white);
   --theme-surface: var(--color-subaru-jacket-mist);
-  --theme-border: var(--color-subaru-stone);
+  --theme-border: var(--color-subaru-jacket-light);
   --theme-header: var(--color-subaru-tracksuit-gray);
   --theme-header-foreground: var(--color-subaru-tracksuit-white);
   --theme-header-accent: var(--color-subaru-amber);

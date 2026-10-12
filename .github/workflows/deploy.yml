@@ -1,0 +1,49 @@
+# Checks every change and publishes main to Cloudflare Workers (workers.dev).
+# Required repository secrets (see README, "Despliegue"):
+#   CONTENT_REPO_TOKEN     read-only token for the private content submodule
+#   CLOUDFLARE_API_TOKEN   token with the "Edit Cloudflare Workers" template
+#   CLOUDFLARE_ACCOUNT_ID  Cloudflare account ID
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Pull requests drop outdated runs; a deploy in progress is never cut short.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+          token: ${{ secrets.CONTENT_REPO_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+
+      - name: Deploy to Cloudflare
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: pnpm wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
