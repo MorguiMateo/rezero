@@ -4,22 +4,93 @@
    static: always emit the variables, even if no utility class uses them,
    because themes.css reads them through var(). */
 
-/* Emilia (default, dark): silver hair, violet eyes, white and lilac dress,
-   the green gem on her collar and the ice of her magic. */
+/* Satella (default, dark): the Witch of Envy. Silver hair and violet eyes like
+   Emilia, wrapped in black shadow with a violet glow; ice blue, a green gem and
+   pale gold for her ornaments. */
 @theme static {
-  --color-emilia-night: #120e1a;
-  --color-emilia-night-2: #1b1526;
-  --color-emilia-mauve-900: #554164;
-  --color-emilia-violet-700: #8a5aaf;
-  --color-emilia-violet-500: #a372c3;
-  --color-emilia-lilac-300: #c190df;
-  --color-emilia-lavender: #b59ef0;
-  --color-emilia-silver: #e2e2e2;
-  --color-emilia-snow: #fafafa;
+  --color-satella-night: #120e1a;
+  --color-satella-night-2: #1b1526;
+  --color-satella-mauve-900: #554164;
+  --color-satella-violet-700: #8a5aaf;
+  --color-satella-violet-500: #a372c3;
+  --color-satella-lilac-300: #c190df;
+  --color-satella-lavender: #b59ef0;
+  --color-satella-silver: #e2e2e2;
+  --color-satella-snow: #fafafa;
+  --color-satella-ice: #90bff9;
+  --color-satella-ice-700: #649cc1;
+  --color-satella-gem: #77cd8e;
+  --color-satella-pale-gold: #f0dead;
+}
+
+/* Emilia (light): white hood with lilac ear tips, silver hair, violet eyes and
+   trim, the green gem on her collar and the ice of her magic. */
+@theme static {
+  --color-emilia-snow: #f5f0fb;
+  --color-emilia-frost: #ebe2f6;
+  --color-emilia-lilac-200: #d6c6ec;
+  --color-emilia-lavender: #ddcbf3;
+  --color-emilia-silver: #d2c5d2;
+  --color-emilia-lilac: #a27fe0;
+  --color-emilia-violet: #6d48a3;
+  --color-emilia-violet-dark: #4f3279;
+  --color-emilia-violet-deep: #5f3a99;
+  --color-emilia-ink: #2a2335;
+  --color-emilia-gray: #625a6e;
+  --color-emilia-ice-light: #e6f1fe;
   --color-emilia-ice: #90bff9;
-  --color-emilia-ice-700: #649cc1;
+  --color-emilia-ice-dark: #2d6a9f;
+  --color-emilia-gem-light: #e1f5e7;
   --color-emilia-gem: #77cd8e;
-  --color-emilia-pale-gold: #f0dead;
+  --color-emilia-gem-dark: #24673a;
+}
+
+/* Shaula (dark): black bodysuit with orange trim, dark rose-maroon hair, green
+   eyes and the night sands of the Augria dunes around the Pleiades Watchtower. */
+@theme static {
+  --color-shaula-night: #140f10;
+  --color-shaula-night-2: #1e1618;
+  --color-shaula-hair-dark: #4a2e35;
+  --color-shaula-hair: #81525d;
+  --color-shaula-hair-light: #c58e9b;
+  --color-shaula-orange-dark: #b86a08;
+  --color-shaula-orange: #ea8c10;
+  --color-shaula-orange-light: #f5ac4a;
+  --color-shaula-dune: #c9b08c;
+  --color-shaula-sand: #f6e8d2;
+  --color-shaula-eye: #8cc152;
+}
+
+/* Beatrice (dark): the Forbidden Library at night, pale blonde drill curls,
+   pink ribbons, crimson dress with white fur, blue butterfly eyes and the gold
+   of her crown. */
+@theme static {
+  --color-beatrice-library: #160f12;
+  --color-beatrice-library-2: #21161a;
+  --color-beatrice-shelf: #4d3038;
+  --color-beatrice-dress-dark: #a42a58;
+  --color-beatrice-dress: #d03a71;
+  --color-beatrice-ribbon: #f09bba;
+  --color-beatrice-ribbon-light: #f8cde0;
+  --color-beatrice-hair: #f3d98a;
+  --color-beatrice-fur: #fbf4ec;
+  --color-beatrice-eye-dark: #4a7fb5;
+  --color-beatrice-eye: #8cbde9;
+  --color-beatrice-crown: #ddb46e;
+}
+
+/* Echidna (dark): the Witch of Greed. Black dress, white hair, dark eyes and
+   the jade butterfly clip in her hair; almost monochrome. */
+@theme static {
+  --color-echidna-black: #0f0f10;
+  --color-echidna-dress: #19191b;
+  --color-echidna-charcoal: #3a3739;
+  --color-echidna-ash: #6d6870;
+  --color-echidna-silver: #c1bcc4;
+  --color-echidna-hair: #f4f4f6;
+  --color-echidna-jade-dark: #1f8a68;
+  --color-echidna-jade: #3ad8a8;
+  --color-echidna-jade-light: #8de8c9;
 }
 
 /* Rem (light): light blue hair, white apron, black maid dress and the violet

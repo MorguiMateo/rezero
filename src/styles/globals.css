@@ -2,7 +2,11 @@
 @import "./palettes.css";
 @import "./themes.css";
 
-/* Match the theme chosen on <html>; Emilia is the default without a variant. */
+/* Match the theme chosen on <html>; Satella is the default without a variant. */
+@custom-variant theme-emilia (&:where([data-theme="emilia"] *));
+@custom-variant theme-shaula (&:where([data-theme="shaula"] *));
+@custom-variant theme-beatrice (&:where([data-theme="beatrice"] *));
+@custom-variant theme-echidna (&:where([data-theme="echidna"] *));
 @custom-variant theme-rem (&:where([data-theme="rem"] *));
 @custom-variant theme-ram (&:where([data-theme="ram"] *));
 @custom-variant theme-subaru (&:where([data-theme="subaru"] *));

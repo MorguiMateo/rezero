@@ -1,5 +1,5 @@
 import type { MetaFunction } from "react-router";
-import { getThemePortrait, themeNames, themes } from "@/lib/theme";
+import { getThemePortrait, themeNames, themes, type Theme } from "@/lib/theme";
 
 // Temporary page to review the design system; delete once it is approved.
 export const meta: MetaFunction = () => [
@@ -11,7 +11,7 @@ export const meta: MetaFunction = () => [
 type Swatch = { token: string; hex: string; className: string; usage: string };
 
 type CharacterPalette = {
-  id: "emilia" | "rem" | "ram" | "subaru";
+  id: Theme;
   character: string;
   description: string;
   sample: string;
@@ -21,25 +21,112 @@ type CharacterPalette = {
 // Class names are written out in full so Tailwind can detect them.
 const characterPalettes: CharacterPalette[] = [
   {
+    id: "satella",
+    character: "Satella · por defecto (oscuro)",
+    description: "La Bruja de la Envidia: pelo plateado y ojos violeta como Emilia, envuelta en sombra con un brillo violeta.",
+    sample:
+      "La sombra se extendió sobre el bosque y, entre la niebla violeta, una voz repitió una y otra vez: te amo.",
+    swatches: [
+      { token: "satella-night", hex: "#120E1A", className: "bg-satella-night", usage: "Fondo base" },
+      { token: "satella-night-2", hex: "#1B1526", className: "bg-satella-night-2", usage: "Superficie / header" },
+      { token: "satella-mauve-900", hex: "#554164", className: "bg-satella-mauve-900", usage: "Bordes" },
+      { token: "satella-violet-700", hex: "#8A5AAF", className: "bg-satella-violet-700", usage: "Hover / activo" },
+      { token: "satella-violet-500", hex: "#A372C3", className: "bg-satella-violet-500", usage: "Botón principal" },
+      { token: "satella-lilac-300", hex: "#C190DF", className: "bg-satella-lilac-300", usage: "Acento / enlaces" },
+      { token: "satella-lavender", hex: "#B59EF0", className: "bg-satella-lavender", usage: "Brillos / focus" },
+      { token: "satella-silver", hex: "#E2E2E2", className: "bg-satella-silver", usage: "Texto secundario" },
+      { token: "satella-snow", hex: "#FAFAFA", className: "bg-satella-snow", usage: "Texto principal" },
+      { token: "satella-ice", hex: "#90BFF9", className: "bg-satella-ice", usage: "Segundo acento" },
+      { token: "satella-ice-700", hex: "#649CC1", className: "bg-satella-ice-700", usage: "Escarcha" },
+      { token: "satella-gem", hex: "#77CD8E", className: "bg-satella-gem", usage: "Nuevo capítulo" },
+      { token: "satella-pale-gold", hex: "#F0DEAD", className: "bg-satella-pale-gold", usage: "Ornamentos" },
+    ],
+  },
+  {
     id: "emilia",
-    character: "Emilia · por defecto (oscuro)",
-    description: "Pelo plateado, ojos violeta, vestido blanco y lila, gema verde y la magia de hielo.",
+    character: "Emilia · claro",
+    description: "Capucha blanca con orejas lila, pelo plateado, ojos y ribetes violeta, gema verde y la magia de hielo.",
     sample:
       "Emilia apoyó la mano sobre el cristal helado y, por un instante, la biblioteca entera brilló con un resplandor violeta.",
     swatches: [
-      { token: "emilia-night", hex: "#120E1A", className: "bg-emilia-night", usage: "Fondo base" },
-      { token: "emilia-night-2", hex: "#1B1526", className: "bg-emilia-night-2", usage: "Superficie / header" },
-      { token: "emilia-mauve-900", hex: "#554164", className: "bg-emilia-mauve-900", usage: "Bordes" },
-      { token: "emilia-violet-700", hex: "#8A5AAF", className: "bg-emilia-violet-700", usage: "Hover / activo" },
-      { token: "emilia-violet-500", hex: "#A372C3", className: "bg-emilia-violet-500", usage: "Botón principal" },
-      { token: "emilia-lilac-300", hex: "#C190DF", className: "bg-emilia-lilac-300", usage: "Acento / enlaces" },
-      { token: "emilia-lavender", hex: "#B59EF0", className: "bg-emilia-lavender", usage: "Brillos / focus" },
-      { token: "emilia-silver", hex: "#E2E2E2", className: "bg-emilia-silver", usage: "Texto secundario" },
-      { token: "emilia-snow", hex: "#FAFAFA", className: "bg-emilia-snow", usage: "Texto principal" },
-      { token: "emilia-ice", hex: "#90BFF9", className: "bg-emilia-ice", usage: "Segundo acento" },
-      { token: "emilia-ice-700", hex: "#649CC1", className: "bg-emilia-ice-700", usage: "Escarcha" },
-      { token: "emilia-gem", hex: "#77CD8E", className: "bg-emilia-gem", usage: "Nuevo capítulo" },
-      { token: "emilia-pale-gold", hex: "#F0DEAD", className: "bg-emilia-pale-gold", usage: "Ornamentos" },
+      { token: "emilia-snow", hex: "#F5F0FB", className: "bg-emilia-snow", usage: "Fondo · capucha" },
+      { token: "emilia-frost", hex: "#EBE2F6", className: "bg-emilia-frost", usage: "Superficie" },
+      { token: "emilia-lilac-200", hex: "#D6C6EC", className: "bg-emilia-lilac-200", usage: "Bordes" },
+      { token: "emilia-lavender", hex: "#DDCBF3", className: "bg-emilia-lavender", usage: "Header" },
+      { token: "emilia-silver", hex: "#D2C5D2", className: "bg-emilia-silver", usage: "Pelo" },
+      { token: "emilia-lilac", hex: "#A27FE0", className: "bg-emilia-lilac", usage: "Orejas · relleno" },
+      { token: "emilia-violet", hex: "#6D48A3", className: "bg-emilia-violet", usage: "Botón / texto" },
+      { token: "emilia-violet-dark", hex: "#4F3279", className: "bg-emilia-violet-dark", usage: "Hover botón" },
+      { token: "emilia-violet-deep", hex: "#5F3A99", className: "bg-emilia-violet-deep", usage: "Acento header" },
+      { token: "emilia-ink", hex: "#2A2335", className: "bg-emilia-ink", usage: "Texto principal" },
+      { token: "emilia-gray", hex: "#625A6E", className: "bg-emilia-gray", usage: "Texto secundario" },
+      { token: "emilia-ice-light", hex: "#E6F1FE", className: "bg-emilia-ice-light", usage: "Hielo · tinte" },
+      { token: "emilia-ice", hex: "#90BFF9", className: "bg-emilia-ice", usage: "Hielo" },
+      { token: "emilia-ice-dark", hex: "#2D6A9F", className: "bg-emilia-ice-dark", usage: "Hielo · texto" },
+      { token: "emilia-gem-light", hex: "#E1F5E7", className: "bg-emilia-gem-light", usage: "Insignia" },
+      { token: "emilia-gem", hex: "#77CD8E", className: "bg-emilia-gem", usage: "Gema" },
+      { token: "emilia-gem-dark", hex: "#24673A", className: "bg-emilia-gem-dark", usage: "Gema · texto" },
+    ],
+  },
+  {
+    id: "beatrice",
+    character: "Beatrice · oscuro",
+    description: "La Biblioteca Prohibida de noche: tirabuzones rubios, lazos rosas, vestido carmesí, ojos azules de mariposa y corona dorada.",
+    sample:
+      "Beatrice cerró el libro de golpe, alzó la barbilla y declaró que la biblioteca no estaba abierta para visitas, de hecho.",
+    swatches: [
+      { token: "beatrice-library", hex: "#160F12", className: "bg-beatrice-library", usage: "Fondo base" },
+      { token: "beatrice-library-2", hex: "#21161A", className: "bg-beatrice-library-2", usage: "Superficie / header" },
+      { token: "beatrice-shelf", hex: "#4D3038", className: "bg-beatrice-shelf", usage: "Bordes" },
+      { token: "beatrice-dress-dark", hex: "#A42A58", className: "bg-beatrice-dress-dark", usage: "Vestido · sombra" },
+      { token: "beatrice-dress", hex: "#D03A71", className: "bg-beatrice-dress", usage: "Vestido" },
+      { token: "beatrice-ribbon", hex: "#F09BBA", className: "bg-beatrice-ribbon", usage: "Botón / enlaces" },
+      { token: "beatrice-ribbon-light", hex: "#F8CDE0", className: "bg-beatrice-ribbon-light", usage: "Hover botón" },
+      { token: "beatrice-hair", hex: "#F3D98A", className: "bg-beatrice-hair", usage: "Pelo · segundo acento" },
+      { token: "beatrice-fur", hex: "#FBF4EC", className: "bg-beatrice-fur", usage: "Texto principal" },
+      { token: "beatrice-eye-dark", hex: "#4A7FB5", className: "bg-beatrice-eye-dark", usage: "Ojos · sombra" },
+      { token: "beatrice-eye", hex: "#8CBDE9", className: "bg-beatrice-eye", usage: "Nuevo capítulo" },
+      { token: "beatrice-crown", hex: "#DDB46E", className: "bg-beatrice-crown", usage: "Corona · relleno" },
+    ],
+  },
+  {
+    id: "subaru",
+    character: "Subaru · claro",
+    description: "Chaqueta verde del arco 6, bufanda y franjas ámbar, chándal blanco y gris, capa negra.",
+    sample:
+      "Subaru se ajustó la capa y la bufanda antes de cruzar las arenas de Augria, con la Torre de Pléyades recortada contra el horizonte.",
+    swatches: [
+      { token: "subaru-tracksuit-white", hex: "#F7F7F5", className: "bg-subaru-tracksuit-white", usage: "Fondo · chándal" },
+      { token: "subaru-tracksuit-gray", hex: "#3A393F", className: "bg-subaru-tracksuit-gray", usage: "Header · chándal" },
+      { token: "subaru-stone", hex: "#D9DCD8", className: "bg-subaru-stone", usage: "Bordes" },
+      { token: "subaru-jacket-mist", hex: "#E6F3EA", className: "bg-subaru-jacket-mist", usage: "Superficie" },
+      { token: "subaru-jacket-light", hex: "#9FD0AC", className: "bg-subaru-jacket-light", usage: "Chaqueta clara" },
+      { token: "subaru-jacket", hex: "#4A9E64", className: "bg-subaru-jacket", usage: "Chaqueta" },
+      { token: "subaru-green", hex: "#2D7044", className: "bg-subaru-green", usage: "Botón / texto" },
+      { token: "subaru-green-dark", hex: "#1F4A2E", className: "bg-subaru-green-dark", usage: "Hover botón" },
+      { token: "subaru-amber-light", hex: "#FDEBCF", className: "bg-subaru-amber-light", usage: "Ámbar · tinte" },
+      { token: "subaru-amber", hex: "#F5B25A", className: "bg-subaru-amber", usage: "Bufanda / franjas" },
+      { token: "subaru-amber-dark", hex: "#8F5508", className: "bg-subaru-amber-dark", usage: "Ámbar · texto" },
+      { token: "subaru-cloak", hex: "#2C2B30", className: "bg-subaru-cloak", usage: "Capa · texto" },
+      { token: "subaru-gray", hex: "#5B5D63", className: "bg-subaru-gray", usage: "Texto secundario" },
+    ],
+  },
+  {
+    id: "echidna",
+    character: "Echidna · oscuro",
+    description: "La Bruja de la Codicia: vestido negro, pelo blanco y la mariposa de jade en el pelo; casi monocromo.",
+    sample:
+      "Echidna sirvió el té en el castillo de sus sueños y, sonriendo, preguntó qué conocimiento venía a buscar su invitado.",
+    swatches: [
+      { token: "echidna-black", hex: "#0F0F10", className: "bg-echidna-black", usage: "Fondo base" },
+      { token: "echidna-dress", hex: "#19191B", className: "bg-echidna-dress", usage: "Superficie / header" },
+      { token: "echidna-charcoal", hex: "#3A3739", className: "bg-echidna-charcoal", usage: "Bordes" },
+      { token: "echidna-ash", hex: "#6D6870", className: "bg-echidna-ash", usage: "Segundo acento · relleno" },
+      { token: "echidna-silver", hex: "#C1BCC4", className: "bg-echidna-silver", usage: "Pelo · sombra" },
+      { token: "echidna-hair", hex: "#F4F4F6", className: "bg-echidna-hair", usage: "Texto / botón" },
+      { token: "echidna-jade-dark", hex: "#1F8A68", className: "bg-echidna-jade-dark", usage: "Jade · relleno" },
+      { token: "echidna-jade", hex: "#3AD8A8", className: "bg-echidna-jade", usage: "Mariposa · enlaces" },
+      { token: "echidna-jade-light", hex: "#8DE8C9", className: "bg-echidna-jade-light", usage: "Jade · brillo" },
     ],
   },
   {
@@ -64,6 +151,26 @@ const characterPalettes: CharacterPalette[] = [
     ],
   },
   {
+    id: "shaula",
+    character: "Shaula · oscuro",
+    description: "Traje negro con ribetes naranja, pelo granate rosado, ojos verdes y las dunas de Augria de noche.",
+    sample:
+      "Shaula saltó desde lo alto de la Torre de Pléyades, saludó con la mano y gritó el nombre de su maestro hacia las dunas.",
+    swatches: [
+      { token: "shaula-night", hex: "#140F10", className: "bg-shaula-night", usage: "Fondo base" },
+      { token: "shaula-night-2", hex: "#1E1618", className: "bg-shaula-night-2", usage: "Superficie / header" },
+      { token: "shaula-hair-dark", hex: "#4A2E35", className: "bg-shaula-hair-dark", usage: "Bordes" },
+      { token: "shaula-hair", hex: "#81525D", className: "bg-shaula-hair", usage: "Pelo" },
+      { token: "shaula-hair-light", hex: "#C58E9B", className: "bg-shaula-hair-light", usage: "Segundo acento" },
+      { token: "shaula-orange-dark", hex: "#B86A08", className: "bg-shaula-orange-dark", usage: "Naranja · sombra" },
+      { token: "shaula-orange", hex: "#EA8C10", className: "bg-shaula-orange", usage: "Botón / ribetes" },
+      { token: "shaula-orange-light", hex: "#F5AC4A", className: "bg-shaula-orange-light", usage: "Acento / enlaces" },
+      { token: "shaula-dune", hex: "#C9B08C", className: "bg-shaula-dune", usage: "Texto secundario" },
+      { token: "shaula-sand", hex: "#F6E8D2", className: "bg-shaula-sand", usage: "Texto principal" },
+      { token: "shaula-eye", hex: "#8CC152", className: "bg-shaula-eye", usage: "Nuevo capítulo" },
+    ],
+  },
+  {
     id: "ram",
     character: "Ram · claro",
     description: "Pelo rosa magenta, delantal blanco, vestido negro y cinta violeta.",
@@ -82,28 +189,6 @@ const characterPalettes: CharacterPalette[] = [
       { token: "ram-ribbon-light", hex: "#EFE9FA", className: "bg-ram-ribbon-light", usage: "Cinta · tinte" },
       { token: "ram-dress", hex: "#2F2C33", className: "bg-ram-dress", usage: "Vestido · texto" },
       { token: "ram-gray", hex: "#625A63", className: "bg-ram-gray", usage: "Texto secundario" },
-    ],
-  },
-  {
-    id: "subaru",
-    character: "Subaru · claro",
-    description: "Chaqueta verde del arco 6, bufanda y franjas ámbar, chándal blanco y gris, capa negra.",
-    sample:
-      "Subaru se ajustó la capa y la bufanda antes de cruzar las arenas de Augria, con la Torre de Pléyades recortada contra el horizonte.",
-    swatches: [
-      { token: "subaru-tracksuit-white", hex: "#F7F7F5", className: "bg-subaru-tracksuit-white", usage: "Fondo · chándal" },
-      { token: "subaru-tracksuit-gray", hex: "#3A393F", className: "bg-subaru-tracksuit-gray", usage: "Header · chándal" },
-      { token: "subaru-stone", hex: "#D9DCD8", className: "bg-subaru-stone", usage: "Bordes" },
-      { token: "subaru-jacket-mist", hex: "#E6F3EA", className: "bg-subaru-jacket-mist", usage: "Superficie" },
-      { token: "subaru-jacket-light", hex: "#9FD0AC", className: "bg-subaru-jacket-light", usage: "Chaqueta clara" },
-      { token: "subaru-jacket", hex: "#4A9E64", className: "bg-subaru-jacket", usage: "Chaqueta" },
-      { token: "subaru-green", hex: "#2D7044", className: "bg-subaru-green", usage: "Botón / texto" },
-      { token: "subaru-green-dark", hex: "#1F4A2E", className: "bg-subaru-green-dark", usage: "Hover botón" },
-      { token: "subaru-amber-light", hex: "#FDEBCF", className: "bg-subaru-amber-light", usage: "Ámbar · tinte" },
-      { token: "subaru-amber", hex: "#F5B25A", className: "bg-subaru-amber", usage: "Bufanda / franjas" },
-      { token: "subaru-amber-dark", hex: "#8F5508", className: "bg-subaru-amber-dark", usage: "Ámbar · texto" },
-      { token: "subaru-cloak", hex: "#2C2B30", className: "bg-subaru-cloak", usage: "Capa · texto" },
-      { token: "subaru-gray", hex: "#5B5D63", className: "bg-subaru-gray", usage: "Texto secundario" },
     ],
   },
 ];

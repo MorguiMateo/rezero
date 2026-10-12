@@ -46,7 +46,7 @@ La base migrada pasó lint, TypeScript, build y comprobación HTTP en Wrangler l
 - `vite.config.ts`: plugins React Router y Tailwind.
 - `wrangler.jsonc`: hosting de `build/client` como Static Assets.
 
-Las cuatro fuentes se empaquetan localmente con Fontsource, sin requests a Google Fonts. Los temas usan `data-theme`; Emilia es el predeterminado. Un botón con la imagen del personaje rota entre temas y guarda la elección en `localStorage`. Los componentes usan tokens semánticos, no colores de personajes directamente.
+Las cuatro fuentes se empaquetan localmente con Fontsource, sin requests a Google Fonts. Los temas usan `data-theme`; Satella es el predeterminado. Un botón con la imagen del personaje rota entre temas y guarda la elección en `localStorage`. Los componentes usan tokens semánticos, no colores de personajes directamente.
 
 ## Estado y siguientes pasos
 

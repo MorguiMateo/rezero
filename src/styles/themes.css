@@ -30,35 +30,96 @@
   --color-focus: var(--theme-focus);
 }
 
-/* Emilia theme (default, dark). */
+/* Satella theme (default, dark). */
 :root,
-[data-theme="emilia"] {
+[data-theme="satella"] {
   color-scheme: dark;
-  --theme-background: var(--color-emilia-night);
-  --theme-surface: var(--color-emilia-night-2);
-  --theme-border: var(--color-emilia-mauve-900);
-  --theme-header: var(--color-emilia-night-2);
-  --theme-header-foreground: var(--color-emilia-snow);
-  --theme-header-accent: var(--color-emilia-lilac-300);
-  --theme-foreground: var(--color-emilia-snow);
-  --theme-muted: color-mix(in oklab, var(--color-emilia-silver) 70%, var(--color-emilia-night));
-  --theme-primary: var(--color-emilia-lilac-300);
-  --theme-primary-fill: var(--color-emilia-violet-500);
-  --theme-primary-soft: var(--color-emilia-lavender);
-  --theme-accent: var(--color-emilia-ice);
-  --theme-accent-fill: var(--color-emilia-ice-700);
-  --theme-accent-soft: color-mix(in oklab, var(--color-emilia-ice-700) 14%, var(--color-emilia-night-2));
-  --theme-button: var(--color-emilia-violet-500);
-  --theme-button-foreground: var(--color-emilia-night);
-  --theme-button-hover: var(--color-emilia-lilac-300);
+  --theme-background: var(--color-satella-night);
+  --theme-surface: var(--color-satella-night-2);
+  --theme-border: var(--color-satella-mauve-900);
+  --theme-header: var(--color-satella-night-2);
+  --theme-header-foreground: var(--color-satella-snow);
+  --theme-header-accent: var(--color-satella-lilac-300);
+  --theme-foreground: var(--color-satella-snow);
+  --theme-muted: color-mix(in oklab, var(--color-satella-silver) 70%, var(--color-satella-night));
+  --theme-primary: var(--color-satella-lilac-300);
+  --theme-primary-fill: var(--color-satella-violet-500);
+  --theme-primary-soft: var(--color-satella-lavender);
+  --theme-accent: var(--color-satella-ice);
+  --theme-accent-fill: var(--color-satella-ice-700);
+  --theme-accent-soft: color-mix(in oklab, var(--color-satella-ice-700) 14%, var(--color-satella-night-2));
+  --theme-button: var(--color-satella-violet-500);
+  --theme-button-foreground: var(--color-satella-night);
+  --theme-button-hover: var(--color-satella-lilac-300);
   --theme-secondary: transparent;
-  --theme-secondary-foreground: var(--color-emilia-lilac-300);
-  --theme-secondary-border: color-mix(in oklab, var(--color-emilia-lilac-300) 50%, transparent);
-  --theme-badge: color-mix(in oklab, var(--color-emilia-gem) 15%, var(--color-emilia-night));
-  --theme-badge-foreground: var(--color-emilia-gem);
-  --theme-badge-border: color-mix(in oklab, var(--color-emilia-gem) 40%, transparent);
-  --theme-focus: var(--color-emilia-lavender);
-  --theme-title-gradient: linear-gradient(175deg, var(--color-emilia-snow) 0%, var(--color-emilia-silver) 30%, var(--color-emilia-lilac-300) 70%, var(--color-emilia-violet-500) 100%);
+  --theme-secondary-foreground: var(--color-satella-lilac-300);
+  --theme-secondary-border: color-mix(in oklab, var(--color-satella-lilac-300) 50%, transparent);
+  --theme-badge: color-mix(in oklab, var(--color-satella-gem) 15%, var(--color-satella-night));
+  --theme-badge-foreground: var(--color-satella-gem);
+  --theme-badge-border: color-mix(in oklab, var(--color-satella-gem) 40%, transparent);
+  --theme-focus: var(--color-satella-lavender);
+  --theme-title-gradient: linear-gradient(175deg, var(--color-satella-snow) 0%, var(--color-satella-silver) 30%, var(--color-satella-lilac-300) 70%, var(--color-satella-violet-500) 100%);
+}
+
+/* Emilia theme (light). The only light theme with a light header: lavender, like
+   the lilac of her hood. */
+[data-theme="emilia"] {
+  color-scheme: light;
+  --theme-background: var(--color-emilia-snow);
+  --theme-surface: var(--color-emilia-frost);
+  --theme-border: var(--color-emilia-lilac-200);
+  --theme-header: var(--color-emilia-lavender);
+  --theme-header-foreground: var(--color-emilia-ink);
+  --theme-header-accent: var(--color-emilia-violet-deep);
+  --theme-foreground: var(--color-emilia-ink);
+  --theme-muted: var(--color-emilia-gray);
+  --theme-primary: var(--color-emilia-violet);
+  --theme-primary-fill: var(--color-emilia-lilac);
+  --theme-primary-soft: var(--color-emilia-lilac);
+  --theme-accent: var(--color-emilia-ice-dark);
+  --theme-accent-fill: var(--color-emilia-ice);
+  --theme-accent-soft: var(--color-emilia-ice-light);
+  --theme-button: var(--color-emilia-violet);
+  --theme-button-foreground: var(--color-emilia-snow);
+  --theme-button-hover: var(--color-emilia-violet-dark);
+  --theme-secondary: transparent;
+  --theme-secondary-foreground: var(--color-emilia-violet);
+  --theme-secondary-border: var(--color-emilia-lilac);
+  --theme-badge: var(--color-emilia-gem-light);
+  --theme-badge-foreground: var(--color-emilia-gem-dark);
+  --theme-badge-border: var(--color-emilia-gem);
+  --theme-focus: var(--color-emilia-violet);
+  --theme-title-gradient: linear-gradient(175deg, var(--color-emilia-ink) 0%, var(--color-emilia-violet) 55%, var(--color-emilia-lilac) 100%);
+}
+
+/* Shaula theme (dark). Orange trim on black, rose hair as the second color. */
+[data-theme="shaula"] {
+  color-scheme: dark;
+  --theme-background: var(--color-shaula-night);
+  --theme-surface: var(--color-shaula-night-2);
+  --theme-border: var(--color-shaula-hair-dark);
+  --theme-header: var(--color-shaula-night-2);
+  --theme-header-foreground: var(--color-shaula-sand);
+  --theme-header-accent: var(--color-shaula-orange);
+  --theme-foreground: var(--color-shaula-sand);
+  --theme-muted: color-mix(in oklab, var(--color-shaula-dune) 80%, var(--color-shaula-night));
+  --theme-primary: var(--color-shaula-orange-light);
+  --theme-primary-fill: var(--color-shaula-orange);
+  --theme-primary-soft: var(--color-shaula-orange-light);
+  --theme-accent: var(--color-shaula-hair-light);
+  --theme-accent-fill: var(--color-shaula-hair);
+  --theme-accent-soft: color-mix(in oklab, var(--color-shaula-hair) 18%, var(--color-shaula-night-2));
+  --theme-button: var(--color-shaula-orange);
+  --theme-button-foreground: var(--color-shaula-night);
+  --theme-button-hover: var(--color-shaula-orange-light);
+  --theme-secondary: transparent;
+  --theme-secondary-foreground: var(--color-shaula-orange-light);
+  --theme-secondary-border: color-mix(in oklab, var(--color-shaula-orange) 55%, transparent);
+  --theme-badge: color-mix(in oklab, var(--color-shaula-eye) 15%, var(--color-shaula-night));
+  --theme-badge-foreground: var(--color-shaula-eye);
+  --theme-badge-border: color-mix(in oklab, var(--color-shaula-eye) 40%, transparent);
+  --theme-focus: var(--color-shaula-orange-light);
+  --theme-title-gradient: linear-gradient(175deg, var(--color-shaula-sand) 0%, var(--color-shaula-orange-light) 45%, var(--color-shaula-orange) 75%, var(--color-shaula-orange-dark) 100%);
 }
 
 /* Rem theme (light). */
@@ -89,6 +150,67 @@
   --theme-badge-border: var(--color-rem-ribbon);
   --theme-focus: var(--color-rem-ribbon);
   --theme-title-gradient: linear-gradient(175deg, var(--color-rem-dress) 0%, var(--color-rem-blue) 55%, var(--color-rem-hair-shadow) 100%);
+}
+
+/* Beatrice theme (dark). Pink ribbons lead, her golden hair and crown are the
+   second color, blue eyes mark new chapters. */
+[data-theme="beatrice"] {
+  color-scheme: dark;
+  --theme-background: var(--color-beatrice-library);
+  --theme-surface: var(--color-beatrice-library-2);
+  --theme-border: var(--color-beatrice-shelf);
+  --theme-header: var(--color-beatrice-library-2);
+  --theme-header-foreground: var(--color-beatrice-fur);
+  --theme-header-accent: var(--color-beatrice-hair);
+  --theme-foreground: var(--color-beatrice-fur);
+  --theme-muted: color-mix(in oklab, var(--color-beatrice-fur) 68%, var(--color-beatrice-library));
+  --theme-primary: var(--color-beatrice-ribbon);
+  --theme-primary-fill: var(--color-beatrice-dress);
+  --theme-primary-soft: var(--color-beatrice-ribbon-light);
+  --theme-accent: var(--color-beatrice-hair);
+  --theme-accent-fill: var(--color-beatrice-crown);
+  --theme-accent-soft: color-mix(in oklab, var(--color-beatrice-crown) 14%, var(--color-beatrice-library-2));
+  --theme-button: var(--color-beatrice-ribbon);
+  --theme-button-foreground: var(--color-beatrice-library);
+  --theme-button-hover: var(--color-beatrice-ribbon-light);
+  --theme-secondary: transparent;
+  --theme-secondary-foreground: var(--color-beatrice-ribbon);
+  --theme-secondary-border: color-mix(in oklab, var(--color-beatrice-ribbon) 50%, transparent);
+  --theme-badge: color-mix(in oklab, var(--color-beatrice-eye-dark) 18%, var(--color-beatrice-library));
+  --theme-badge-foreground: var(--color-beatrice-eye);
+  --theme-badge-border: color-mix(in oklab, var(--color-beatrice-eye) 40%, transparent);
+  --theme-focus: var(--color-beatrice-hair);
+  --theme-title-gradient: linear-gradient(175deg, var(--color-beatrice-fur) 0%, var(--color-beatrice-hair) 35%, var(--color-beatrice-ribbon) 75%, var(--color-beatrice-dress) 100%);
+}
+
+/* Echidna theme (dark). Black and white, with jade as the only color. */
+[data-theme="echidna"] {
+  color-scheme: dark;
+  --theme-background: var(--color-echidna-black);
+  --theme-surface: var(--color-echidna-dress);
+  --theme-border: var(--color-echidna-charcoal);
+  --theme-header: var(--color-echidna-dress);
+  --theme-header-foreground: var(--color-echidna-hair);
+  --theme-header-accent: var(--color-echidna-jade);
+  --theme-foreground: var(--color-echidna-hair);
+  --theme-muted: color-mix(in oklab, var(--color-echidna-silver) 80%, var(--color-echidna-black));
+  --theme-primary: var(--color-echidna-jade);
+  --theme-primary-fill: var(--color-echidna-jade-dark);
+  --theme-primary-soft: var(--color-echidna-jade-light);
+  --theme-accent: var(--color-echidna-silver);
+  --theme-accent-fill: var(--color-echidna-ash);
+  --theme-accent-soft: color-mix(in oklab, var(--color-echidna-ash) 18%, var(--color-echidna-dress));
+  --theme-button: var(--color-echidna-hair);
+  --theme-button-foreground: var(--color-echidna-black);
+  --theme-button-hover: var(--color-echidna-silver);
+  --theme-secondary: transparent;
+  --theme-secondary-foreground: var(--color-echidna-hair);
+  --theme-secondary-border: color-mix(in oklab, var(--color-echidna-hair) 45%, transparent);
+  --theme-badge: color-mix(in oklab, var(--color-echidna-jade) 14%, var(--color-echidna-black));
+  --theme-badge-foreground: var(--color-echidna-jade);
+  --theme-badge-border: color-mix(in oklab, var(--color-echidna-jade) 40%, transparent);
+  --theme-focus: var(--color-echidna-jade);
+  --theme-title-gradient: linear-gradient(175deg, var(--color-echidna-hair) 0%, var(--color-echidna-silver) 45%, var(--color-echidna-jade-light) 80%, var(--color-echidna-jade) 100%);
 }
 
 /* Ram theme (light). */

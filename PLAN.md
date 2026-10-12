@@ -13,11 +13,11 @@ Referencias: [prerender de React Router](https://reactrouter.com/how-to/pre-rend
 ## Estado y alcance
 
 - Home provisional (lista de obras) y `/estilos`, con HTML prerenderizado. Siguiente paso: layout global y diseño de la home (ver "Fases por sección").
-- Se conservan paletas y temas Emilia, Rem, Ram y Subaru, tokens semánticos y tipografías Cormorant, Jost, Literata y JetBrains Mono; fuentes locales empaquetadas con Fontsource.
+- Se conservan paletas y temas Satella, Emilia, Beatrice, Subaru, Echidna, Rem, Shaula y Ram, tokens semánticos y tipografías Cormorant, Jost, Literata y JetBrains Mono; fuentes locales empaquetadas con Fontsource.
 - Base de routing, metadatos, ESLint, TypeScript y preview local de Cloudflare.
 - Recorrido de novela prerenderizado: obra → volumen → capítulo con navegación anterior/siguiente, leído desde el submódulo `content/` (por ahora con contenido de ejemplo).
 - Todavía no hay catálogo, lector de manga, conversión de EPUB ni botón de cambio de tema.
-- Fuera de alcance: cuentas, sesión, progreso, favoritos, historial y preferencias guardadas. El tema se cambia con un botón de personajes (Emilia → Rem → Ram → Subaru) y se guarda en `localStorage`, aplicado antes del primer pintado por un script inline; por defecto, Emilia.
+- Fuera de alcance: cuentas, sesión, progreso, favoritos, historial y preferencias guardadas. El tema se cambia con un botón de personajes (Satella → Emilia → Beatrice → Subaru → Echidna → Rem → Shaula → Ram) y se guarda en `localStorage`, aplicado antes del primer pintado por un script inline; por defecto, Satella.
 - No se ha desplegado en producción ni configurado bucket, dominio o CI/CD. No habrá backend.
 
 ## Requisitos técnicos
@@ -80,9 +80,9 @@ Referencia en ranoa.lat: barra fija con el logo a la izquierda y la navegación 
 - [x] Layout en `src/root.tsx` con enlace "Saltar al contenido" a `#contenido-principal`; cabecera fija (`sticky`).
 - [x] Logo "Biblioteca de Pléyades" que lleva a `/`. Navegación: Inicio, Novela y Manga, con el activo resaltado (✦ + subrayado).
 - [x] `/novela` y `/manga` prerenderizadas con "Próximamente" hasta las secciones 3 y 7.
-- [x] Botón de personajes en lugar de "Entrar": imagen del personaje actual que rota Emilia → Rem → Ram → Subaru, guardada en `localStorage` y aplicada por un script inline en `<head>` antes del primer pintado. Los cuatro retratos van en el HTML y el CSS muestra el del tema activo.
+- [x] Botón de personajes en lugar de "Entrar": imagen del personaje actual que rota Satella → Emilia → Beatrice → Subaru → Echidna → Rem → Shaula → Ram, guardada en `localStorage` y aplicada por un script inline en `<head>` antes del primer pintado. Todos los retratos van en el HTML y el CSS muestra el del tema activo.
 - [ ] Móvil: botón de menú (hamburguesa) y botón de tema en cuadros con borde; menú desplegable accesible, sin librerías. **Por decidir:** hoy los tres enlaces caben a 360 px y en móvil el logo queda solo con las estrellas.
-- [x] Logo: siete estrellas de las Pléyades + nombre (`pleiades-mark.tsx`, `public/favicon.svg`). Botón de tema: iconos circulares estilo Crunchyroll tomados de los iconos oficiales de la [web del anime](https://re-zero-anime.jp/tv/character/) (Emilia: ficha actual; Rem y Ram: temporada 1; Subaru: arco 6), 96×96 WebP en `public/characters/`. Son imágenes con copyright (© Nagatsuki/KADOKAWA); se usan por decisión del usuario.
+- [x] Logo: siete estrellas de las Pléyades + nombre (`pleiades-mark.tsx`, `public/favicon.svg`). Botón de tema: iconos circulares estilo Crunchyroll tomados de los iconos oficiales de la [web del anime](https://re-zero-anime.jp/tv/character/) (Emilia: ficha actual; Rem y Ram: temporada 1; Subaru: arco 6; Beatrice, Echidna y Shaula: ficha actual). Satella no tiene ficha oficial: su icono es un recorte de un fotograma del anime (temporada 2) tomado de la wiki de Fandom, 96×96 WebP en `public/characters/`. Son imágenes con copyright (© Nagatsuki/KADOKAWA); se usan por decisión del usuario.
 
 ### Sección 2: Home (`/`) — en curso
 

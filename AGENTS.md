@@ -4,7 +4,7 @@
 - **File names:** use `kebab-case` (e.g. `user-profile.tsx`, `format-date.ts`).
 - **Variables and functions:** use `camelCase` (e.g. `userName`, `getUserById`).
 - **Design tokens:** Tailwind theme tokens (colors, fonts) and custom `@utility` names must be in English and `kebab-case` (e.g. `emilia-violet-500`, `font-reading`). User-facing text stays in Spanish.
-- **Colors and themes:** raw character palettes live in `src/styles/palettes.css` (one commented block per character); themes live in `src/styles/themes.css` and are selected with `data-theme` (Emilia is the default). A single header button shows the current character's image and cycles themes on each click (Emilia → Rem → Ram → Subaru → Emilia); the choice is saved in `localStorage` (the only allowed use of `localStorage`) and applied before first paint by a tiny inline script in `<head>` (see section 1). Components must use the semantic tokens (`bg-background`, `text-foreground`, `text-primary`, `bg-button`…), never raw palette tokens like `bg-rem-hair`, so every theme keeps working.
+- **Colors and themes:** raw character palettes live in `src/styles/palettes.css` (one commented block per character); themes live in `src/styles/themes.css` and are selected with `data-theme` (Satella is the default). A single header button shows the current character's image and cycles themes on each click (Satella → Emilia → Beatrice → Subaru → Echidna → Rem → Shaula → Ram → Satella; dark and light alternate, each group ordered from most to least protagonist); the choice is saved in `localStorage` (the only allowed use of `localStorage`) and applied before first paint by a tiny inline script in `<head>` (see section 1). Components must use the semantic tokens (`bg-background`, `text-foreground`, `text-primary`, `bg-button`…), never raw palette tokens like `bg-rem-hair`, so every theme keeps working.
 
 # Reglas de arquitectura: pre-render con React Router sobre Cloudflare
 
@@ -33,7 +33,7 @@ Estático, siempre pre-renderizado:
 
 Dinámico, solo en el cliente:
 
-- Cambio de tema con el botón de personajes, guardado en `localStorage`. Sin valor guardado, el tema es Emilia.
+- Cambio de tema con el botón de personajes, guardado en `localStorage`. Sin valor guardado, el tema es Satella.
 
 Fuera de alcance (no implementar sin preguntar):
 
@@ -42,8 +42,8 @@ Fuera de alcance (no implementar sin preguntar):
 Reglas:
 
 - Las rutas de contenido son módulos React Router con HTML completo generado en el build. Cargar contenido con `loader` de build, no con `clientLoader`, efectos ni fetch de request.
-- Componentes de ruta normales se renderizan también durante el build: no usar `window`, `document` ni `localStorage` durante el render. El HTML se genera siempre con el tema Emilia.
-- Excepción única: un script inline pequeño y síncrono en `<head>` de `src/root.tsx` lee el tema de `localStorage` (dentro de `try/catch`, validando que sea un tema conocido) y fija `data-theme` en `<html>` antes del primer pintado, para evitar el destello de Emilia. `<html>` lleva `suppressHydrationWarning` solo por ese atributo. El botón lee el tema actual de `document.documentElement` después de hidratar, nunca durante el render.
+- Componentes de ruta normales se renderizan también durante el build: no usar `window`, `document` ni `localStorage` durante el render. El HTML se genera siempre con el tema Satella.
+- Excepción única: un script inline pequeño y síncrono en `<head>` de `src/root.tsx` lee el tema de `localStorage` (dentro de `try/catch`, validando que sea un tema conocido) y fija `data-theme` en `<html>` antes del primer pintado, para evitar el destello de Satella. `<html>` lleva `suppressHydrationWarning` solo por ese atributo. El botón lee el tema actual de `document.documentElement` después de hidratar, nunca durante el render.
 - El hosting estático no ejecuta `action`, `headers` ni endpoints de servidor de React Router; no usarlos.
 
 ## 2. Rutas: segmentos, no query params
