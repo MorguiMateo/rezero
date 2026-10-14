@@ -82,9 +82,11 @@ python3 scripts/import-epub.py \
   ../rezero-library/imports/ln-volumen-01-reimport
 ```
 
-Los EPUB de Furuki Fansub comparten plantilla, así que `../rezero-library/tools/furuki-recipe.py` genera su receta (tomos de la obra `re-zero` por defecto; `--work-slug`, `--work-title`, `--label` y `--description` para otras obras como `re-zero-ex-scorpion-tale`). Revisar la receta antes de importar.
+Los EPUB de Furuki Fansub comparten plantilla, así que `../rezero-library/tools/furuki-recipe.py` genera su receta (tomos de la obra `re-zero` por defecto; `--work-slug`, `--work-title`, `--label` y `--description` para otras obras como `re-zero-ex-scorpion-tale`). Para cualquier otra plantilla, `../rezero-library/tools/epub-recipe.py` agrupa el spine por el primer `<h1>` de cada documento (Prólogo, Capítulo N, Interludio, Posfacio…) e imprime un resumen. Las traducciones publicadas por capítulos en Wattpad se convierten antes en EPUB (con su receta) mediante `../rezero-library/tools/wattpad-epub.py`. Revisar la receta antes de importar.
 
-El destino debe ser nuevo. La receta enumera todos los documentos del spine, sus agrupaciones por capítulo y las imágenes; cualquier omisión, duplicación o cambio del orden falla. El script conserva énfasis y notas al pie, convierte imágenes a WebP sin pérdida y valida texto, imágenes y notas mediante un round-trip de Markdown. El informe registra procedencia y SHA-256 del EPUB. Revisar también la conversión en navegador: estas comprobaciones no evalúan la fidelidad de la traducción.
+El destino debe ser nuevo. La receta enumera todos los documentos del spine, sus agrupaciones por capítulo y las imágenes; cualquier omisión, duplicación o cambio del orden falla. El script conserva énfasis y notas al pie, convierte imágenes a WebP (sin pérdida por defecto; los tomos 5–24, 28 en adelante y Ex usan `--quality 90` para no inflar el repositorio) y valida texto, imágenes y notas mediante un round-trip de Markdown. El informe registra procedencia y SHA-256 del EPUB. Revisar también la conversión en navegador: estas comprobaciones no evalúan la fidelidad de la traducción.
+
+Los tomos que solo existen en PDF se importan con `scripts/import-pdf.py` (requiere PyMuPDF; hay un venv en `../rezero-library/tools/.venv`): `extract` genera una receta revisable con secciones, páginas e imágenes, y `convert` escribe el staging con el mismo formato. No hace OCR.
 
 Tras revisar el staging, copiar `novela/` e `images/` al submódulo, **fusionando** `images.json` con el manifiesto existente sin perder otras obras. No copiar el EPUB ni el informe a assets públicos. Ejecutar lint, typecheck, build y preview antes de publicar. El importador no modifica el submódulo, hace commits ni despliega automáticamente.
 

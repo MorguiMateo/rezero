@@ -11,6 +11,7 @@ import json
 import posixpath
 import re
 import subprocess
+import sys
 import tempfile
 import xml.etree.ElementTree as xml
 import zipfile
@@ -61,18 +62,98 @@ def plainText(value):
     return re.sub(r"\s+", " ", "".join(parts)).strip()
 
 
+def moveEdgePunctuation(inlines):
+    def isWord(node, edge):
+        return (isinstance(node, dict) and node.get("t") == "Str" and node["c"]
+                and node["c"][edge].isalnum())
+    result = list(inlines)
+    for index, node in enumerate(result):
+        if not (isinstance(node, dict) and node.get("t") in ("Emph", "Strong") and node["c"]):
+            continue
+        inner = node["c"]
+        after = result[index + 1] if index + 1 < len(result) else None
+        before = result[index - 1] if index else None
+        last, first = inner[-1], inner[0]
+        if isWord(after, 0) and last.get("t") == "Str" and not last["c"][-1].isalnum():
+            match = re.search(r"[^\w]+$", last["c"])
+            moved, last["c"] = match.group(), last["c"][:match.start()]
+            after["c"] = moved + after["c"]
+            if not last["c"]:
+                inner.pop()
+        if isWord(before, -1) and first.get("t") == "Str" and inner and not first["c"][0].isalnum():
+            match = re.match(r"[^\w]+", first["c"])
+            moved, first["c"] = match.group(), first["c"][match.end():]
+            before["c"] = before["c"] + moved
+            if not first["c"]:
+                inner.pop(0)
+    return [node for node in result if not (isinstance(node, dict) and node.get("t") in ("Emph", "Strong")
+                                            and not node["c"])]
+
+
+def trimBreaks(inlines, edge):
+    """Drop breaks and spaces at one edge (0 start, -1 end), also inside edge emphasis."""
+    inlines = copy.deepcopy(inlines)
+    while inlines:
+        node = inlines[edge]
+        if node.get("t") in ("LineBreak", "Space", "SoftBreak"):
+            inlines.pop(edge)
+        elif node.get("t") in ("Emph", "Strong", "Underline"):
+            node["c"] = trimBreaks(node["c"], edge)
+            if node["c"]:
+                break
+            inlines.pop(edge)
+        elif node.get("t") == "Span":
+            node["c"][1] = trimBreaks(node["c"][1], edge)
+            if node["c"][1]:
+                break
+            inlines.pop(edge)
+        else:
+            break
+    return inlines
+
+
 def normalizeAst(value, noteBlocks, noteCounts):
     if isinstance(value, list):
-        return [normalizeAst(child, noteBlocks, noteCounts) for child in value]
+        result = []
+        for child in value:
+            child = normalizeAst(child, noteBlocks, noteCounts)
+            # "*texto\\\n*" never closes in CommonMark; keep edge breaks outside the emphasis.
+            if isinstance(child, dict) and child.get("t") in ("Emph", "Strong") and child["c"]:
+                inner = child["c"]
+                lead = [] if inner[0].get("t") != "LineBreak" else [inner.pop(0)]
+                trail = [] if not inner or inner[-1].get("t") != "LineBreak" else [inner.pop()]
+                result.extend(lead + ([child] if inner else []) + trail)
+            else:
+                result.append(child)
+        # "*wasou――*todos" cannot close in CommonMark: punctuation at the inner edge of
+        # emphasis touching a letter outside. Move that punctuation out of the emphasis.
+        result = moveEdgePunctuation(result)
+        # GFM autolinks a bare URL and would swallow the "\" of a hard break right after it.
+        return [{"t": "Space"} if isinstance(node, dict) and node.get("t") == "LineBreak" and index
+                and isinstance(result[index - 1], dict) and result[index - 1].get("t") == "Str"
+                and re.search(r"(https?://|www\.)\S*$", result[index - 1]["c"]) else node
+                for index, node in enumerate(result)]
     if not isinstance(value, dict):
         return value
     kind = value.get("t")
     if kind in ("RawBlock", "RawInline"):
         raise ValueError("Unexpected raw markup in EPUB")
+    # A line break at either end of a paragraph would become a literal "\" in Markdown.
+    if kind in ("Para", "Plain"):
+        value = {"t": kind, "c": trimBreaks(trimBreaks(value["c"], 0), -1)}
     # Emphasis on punctuation alone (a closing quote, a lone "!") can become literal
     # * or ** in CommonMark. Keep every character, but discard that publisher decoration.
     if kind in ("Emph", "Strong", "Underline") and not any(character.isalnum() for character in plainText(value["c"])):
         return {"t": "Span", "c": [["", [], []], normalizeAst(value["c"], noteBlocks, noteCounts)]}
+    # ATX headings cannot hold hard line breaks; read them as spaces.
+    if kind == "Header":
+        level, attributes, inlines = value["c"]
+        value = {"t": kind, "c": [level, attributes, json.loads(json.dumps(trimBreaks(trimBreaks(inlines, 0), -1))
+                                                              .replace('{"t": "LineBreak"}', '{"t": "Space"}'))]}
+    # <i><i>x</i></i> is still italic, but Markdown cannot nest emphasis directly.
+    while kind in ("Emph", "Underline") and len(value["c"]) == 1 and value["c"][0].get("t") in ("Emph", "Underline"):
+        value = {"t": "Emph", "c": value["c"][0]["c"]}
+        kind = "Emph"
     # CommonMark has no underline; represent that emphasis without raw HTML.
     if kind == "Underline":
         return {"t": "Emph", "c": normalizeAst(value["c"], noteBlocks, noteCounts)}
@@ -80,10 +161,20 @@ def normalizeAst(value, noteBlocks, noteCounts):
         target = value["c"][2][0]
         if target.startswith("epub-note:"):
             noteId = target.removeprefix("epub-note:")
+            if noteId not in noteBlocks:
+                # A marker pointing at a note the edition never wrote ("ntX"); drop the marker.
+                print(f"warning: dropped reference to missing note {noteId!r}", file=sys.stderr)
+                return {"t": "Span", "c": [["", [], []], []]}
             noteCounts[noteId] += 1
-            return {"t": "Note", "c": copy.deepcopy(noteBlocks[noteId])}
+            return {"t": "Note", "c": normalizeAst(copy.deepcopy(noteBlocks[noteId]), noteBlocks, noteCounts)}
         raise ValueError(f"Unmapped EPUB link: {target}")
     return {key: normalizeAst(child, noteBlocks, noteCounts) for key, child in value.items()}
+
+
+def linkAncestors(element, parents):
+    while element in parents:
+        element = parents[element]
+        yield element
 
 
 def removeKeepingTail(parent, child):
@@ -96,13 +187,30 @@ def removeKeepingTail(parent, child):
     parent.remove(child)
 
 
+def webpSize(data):
+    # cwebp writes a single VP8 (lossy) or VP8L (lossless) chunk, or VP8X when there is alpha.
+    if data[:4] != b"RIFF" or data[8:12] != b"WEBP":
+        raise ValueError("Expected WebP")
+    chunk = data[12:16]
+    if chunk == b"VP8 " and data[23:26] == b"\x9d\x01\x2a":
+        return {"width": int.from_bytes(data[26:28], "little") & 0x3fff,
+                "height": int.from_bytes(data[28:30], "little") & 0x3fff}
+    if chunk == b"VP8L" and data[20] == 0x2f:
+        sizeBits = int.from_bytes(data[21:25], "little")
+        return {"width": (sizeBits & 0x3fff) + 1, "height": ((sizeBits >> 14) & 0x3fff) + 1}
+    if chunk == b"VP8X":
+        return {"width": int.from_bytes(data[24:27], "little") + 1,
+                "height": int.from_bytes(data[27:30], "little") + 1}
+    raise ValueError("Unknown WebP chunk")
+
+
 def writeYaml(filePath, data):
     filePath.parent.mkdir(parents=True, exist_ok=True)
     filePath.write_text("\n".join(f"{key}: {json.dumps(value, ensure_ascii=False)}"
                                   for key, value in data.items()) + "\n")
 
 
-def importEpub(epubPath, recipePath, outputPath):
+def importEpub(epubPath, recipePath, outputPath, quality=None):
     recipe = json.loads(recipePath.read_text())
     if outputPath.exists():
         raise ValueError("Staging directory already exists; choose a new destination")
@@ -138,14 +246,9 @@ def importEpub(epubPath, recipePath, outputPath):
             originalPath.write_bytes(archive.read(sourcePath))
             imagePath = outputPath / "images" / targetPath
             imagePath.parent.mkdir(parents=True, exist_ok=True)
-            runCommand(["cwebp", "-quiet", "-lossless", "-exact", str(originalPath), "-o", str(imagePath)])
-            # cwebp lossless emits a VP8L header containing the original dimensions.
-            data = imagePath.read_bytes()
-            if data[12:16] != b"VP8L" or data[20] != 0x2f:
-                raise ValueError("Expected lossless WebP")
-            sizeBits = int.from_bytes(data[21:25], "little")
-            imageManifest[targetPath] = {"width": (sizeBits & 0x3fff) + 1,
-                                         "height": ((sizeBits >> 14) & 0x3fff) + 1}
+            encoding = ["-lossless", "-exact"] if quality is None else ["-q", str(quality), "-m", "6"]
+            runCommand(["cwebp", "-quiet", *encoding, "-metadata", "none", str(originalPath), "-o", str(imagePath)])
+            imageManifest[targetPath] = webpSize(imagePath.read_bytes())
             imageMap[sourcePath] = targetPath
 
         # Each note is the list item or paragraph around an anchor whose id the
@@ -154,21 +257,30 @@ def importEpub(epubPath, recipePath, outputPath):
         if recipe.get("notes"):
             noteDocument = xml.fromstring(archive.read(recipe["notes"]))
             parents = {child: parent for parent in noteDocument.iter() for child in parent}
-            for link in noteDocument.findall(".//{*}a[@id]"):
+            # Ids sit on the note itself (<li id>, <aside id>) or on an anchor inside it.
+            holders = [element for element in noteDocument.iter()
+                       if element.get("id") and element.tag.split("}")[-1] in ("li", "aside")]
+            anchors = [link for link in noteDocument.findall(".//{*}a[@id]")
+                       if not any(holder in linkAncestors(link, parents) for holder in holders)]
+            for link in holders + anchors:
                 noteId = link.get("id")
                 if noteId in noteBlocks:
                     raise ValueError(f"Duplicate translator note: {noteId}")
                 element = link
-                while element.tag.split("}")[-1] not in ("li", "p"):
+                while element.tag.split("}")[-1] not in ("li", "p", "aside"):
                     element = parents[element]
                 # Some editions repeat the note number ("[1]") before its text.
                 for marker in element.findall(".//{*}sup"):
-                    if re.fullmatch(r"\[?\d+\]?", "".join(marker.itertext()).strip()):
+                    if re.fullmatch(r"[\[(❮]?\d+[\])❯]?", "".join(marker.itertext()).strip()):
                         removeKeepingTail(parents[marker], marker)
+                    else:
+                        marker.tag = "span"
                 for anchor in element.findall(".//{*}a"):
                     anchor.tag = "span"
                     anchor.attrib.clear()
-                element.tag = "p"
+                hasBlocks = any(child.tag.split("}")[-1] in ("p", "div") for child in element)
+                element.tag = "div" if hasBlocks else "p"
+                element.attrib.clear()
                 noteBlocks[noteId] = parseHtml(element)["blocks"]
 
         noteCounts = Counter()
@@ -178,6 +290,14 @@ def importEpub(epubPath, recipePath, outputPath):
             for sourcePath in group["files"]:
                 document = xml.fromstring(archive.read(sourcePath))
                 body = document.find("{*}body")
+                # Full-page covers are often <svg><image xlink:href="…"/></svg>; keep them as <img>.
+                for svg in [element for element in body.iter() if element.tag.endswith("}svg")]:
+                    image = next(element for element in svg.iter() if element.tag.endswith("}image"))
+                    source = image.get("{http://www.w3.org/1999/xlink}href") or image.get("href")
+                    tail = svg.tail
+                    svg.clear()
+                    svg.tag, svg.tail = "img", tail
+                    svg.set("src", source)
                 for element in body.iter():
                     tag = element.tag.split("}")[-1]
                     element.tag = tag
@@ -202,6 +322,11 @@ def importEpub(epubPath, recipePath, outputPath):
                             element.attrib.clear()
                     if tag == "sup":
                         element.tag = "span"
+                    # Captioned images (colour credits) read as an image paragraph plus a caption.
+                    if tag == "figure":
+                        element.tag = "div"
+                    if tag == "figcaption":
+                        element.tag = "p"
                 part = parseHtml(body)
                 # The route already renders the chapter title; keep numbered subsections.
                 part["blocks"] = [block for block in part["blocks"]
@@ -212,6 +337,9 @@ def importEpub(epubPath, recipePath, outputPath):
                 else:
                     combined["blocks"].extend(part["blocks"])
             combined = normalizeAst(combined, noteBlocks, noteCounts)
+            # Some editions space paragraphs with empty ones (<p><br/></p>).
+            combined["blocks"] = [block for block in combined["blocks"]
+                                  if not (block["t"] in ("Para", "Plain") and not block["c"])]
             markdown = runCommand(["pandoc", "--sandbox", "-f", "json", "-t", "gfm-raw_html",
                                    "--wrap=none"], json.dumps(combined))
             markdown = re.sub(r"(?m)^-{3,}$", "***", markdown)
@@ -220,14 +348,16 @@ def importEpub(epubPath, recipePath, outputPath):
             roundTrip = json.loads(runCommand(["pandoc", "--sandbox", "-f", "gfm", "-t", "json"], markdown))
             before, after = plainText(combined["blocks"]), plainText(roundTrip["blocks"])
             if before != after:
+                Path(tempfile.gettempdir(), "import-epub-failed.md").write_text(markdown)
                 index = next((i for i, pair in enumerate(zip(before, after)) if pair[0] != pair[1]),
                              min(len(before), len(after)))
                 raise ValueError(f"Text changed during conversion: {group['slug']}: "
-                                 f"{before[index - 60:index + 60]!r} != {after[index - 60:index + 60]!r}")
+                                 f"{before[max(0, index - 60):index + 60]!r} != {after[max(0, index - 60):index + 60]!r}")
             before = Counter(node.get("t") for node in nodes(combined))
             after = Counter(node.get("t") for node in nodes(roundTrip))
             for kind in ("Image", "Emph", "Strong", "Note"):
                 if before[kind] != after[kind]:
+                    Path(tempfile.gettempdir(), "import-epub-failed.md").write_text(markdown)
                     raise ValueError(f"Lost {kind} in {group['slug']}")
             chapterPath = outputPath / "novela" / recipe["workSlug"] / recipe["volumeSlug"] / (group["slug"] + ".md")
             chapterPath.parent.mkdir(parents=True, exist_ok=True)
@@ -254,5 +384,6 @@ if __name__ == "__main__":
     parser.add_argument("epub", type=Path)
     parser.add_argument("recipe", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--quality", type=int, help="lossy WebP quality (default: lossless)")
     options = parser.parse_args()
-    importEpub(options.epub, options.recipe, options.output)
+    importEpub(options.epub, options.recipe, options.output, options.quality)
