@@ -20,6 +20,8 @@ pnpm dev
 
 Abrir la URL que indique Vite (por defecto `http://localhost:5173`).
 
+Al añadir, retirar o editar capítulos, YAML o `content/images.json`, Vite reinicia automáticamente el servidor para actualizar las rutas de prerender y sus datos de navegación. Esto solo afecta al desarrollo: en producción sigue siendo necesario hacer build + deploy.
+
 ## Verificación y preview local
 
 ```sh
@@ -51,9 +53,9 @@ Las cuatro fuentes se empaquetan localmente con Fontsource, sin requests a Googl
 
 ## Estado y siguientes pasos
 
-Implementado: home provisional, guía de estilos temporal (noindex), cuatro temas y base de build estático/preview local. Recorrido de novela obra → volumen → capítulo prerenderizado desde `content/` (con contenido de ejemplo). No hay catálogo, lector de manga, conversión de EPUB ni deploy de producción. Cuentas, progreso, favoritos y preferencias guardadas (salvo el tema) están fuera de alcance.
+Implementado: home provisional, guía de estilos temporal (noindex), ocho temas y base de build estático/preview local. Recorrido de novela obra → volumen → capítulo prerenderizado desde `content/`, con el volumen 1 de la novela ligera en español. Hay una herramienta de conversión offline de EPUB. Los capítulos se abren en modo lectura (sin header, barra que se oculta al bajar, progreso y atajos `←` `→` `Esc`) y el progreso se guarda solo en el navegador. El lector de manga sigue pendiente. Cuentas, sincronización, favoritos y otras preferencias guardadas están fuera de alcance.
 
-El siguiente paso es el script de conversión EPUB → Markdown con la primera novela real. No hay backend. Las portadas e ilustraciones de novela viven en `content/images/` y se publican con el sitio en `/img/`; las páginas de manga irán en un proyecto de Workers aparte (ver `AGENTS.md`).
+No hay backend. Las portadas e ilustraciones de novela viven en `content/images/` y se publican con el sitio en `/img/`; las páginas de manga irán en un proyecto de Workers aparte (ver `AGENTS.md`).
 
 La guía de Cloudflare advierte que su plugin Vite no admite prerender de React Router; por eso este proyecto utiliza Vite para build y Wrangler para Static Assets, sin `@cloudflare/vite-plugin`.
 
@@ -66,6 +68,25 @@ El texto de las novelas vive en el repo privado `MorguiMateo/rezero-content`, mo
 - Clonar todo: `git clone --recurse-submodules https://github.com/MorguiMateo/rezero.git`
 - Si ya clonaste sin submódulos: `git submodule update --init`
 - Publicar contenido nuevo: commit + push dentro de `content/`, luego en la raíz `git add content && git commit` para actualizar el puntero.
+
+### Importar un EPUB offline
+
+Guardar los originales, recetas e informes **fuera de cualquier repositorio**. La importación inicial está en `../rezero-library/`: `originals/novela-ligera/` conserva el EPUB y `imports/` contiene la receta y la conversión del volumen 1 de Furuki Fansub. La novela ligera usa la obra `re-zero`; una futura novela web debe usar otra obra, por ejemplo `re-zero-wn`.
+
+La herramienta requiere Python 3, Pandoc y `cwebp` instalados localmente. No añade dependencias al lector ni descarga contenido durante el build.
+
+```sh
+python3 scripts/import-epub.py \
+  ../rezero-library/originals/novela-ligera/re-zero-volumen-01-furuki.epub \
+  ../rezero-library/imports/ln-volumen-01-recipe.json \
+  ../rezero-library/imports/ln-volumen-01-reimport
+```
+
+Los EPUB de Furuki Fansub comparten plantilla, así que `../rezero-library/tools/furuki-recipe.py` genera su receta (tomos de la obra `re-zero` por defecto; `--work-slug`, `--work-title`, `--label` y `--description` para otras obras como `re-zero-ex-scorpion-tale`). Revisar la receta antes de importar.
+
+El destino debe ser nuevo. La receta enumera todos los documentos del spine, sus agrupaciones por capítulo y las imágenes; cualquier omisión, duplicación o cambio del orden falla. El script conserva énfasis y notas al pie, convierte imágenes a WebP sin pérdida y valida texto, imágenes y notas mediante un round-trip de Markdown. El informe registra procedencia y SHA-256 del EPUB. Revisar también la conversión en navegador: estas comprobaciones no evalúan la fidelidad de la traducción.
+
+Tras revisar el staging, copiar `novela/` e `images/` al submódulo, **fusionando** `images.json` con el manifiesto existente sin perder otras obras. No copiar el EPUB ni el informe a assets públicos. Ejecutar lint, typecheck, build y preview antes de publicar. El importador no modifica el submódulo, hace commits ni despliega automáticamente.
 
 ## Despliegue (GitHub Actions → Cloudflare)
 
