@@ -6,7 +6,7 @@ export type Theme = (typeof themes)[number];
 
 export const defaultTheme: Theme = "satella";
 
-// The theme is the only value this site stores in localStorage (see AGENTS.md).
+// Besides the reading progress, the theme is the only value this site stores in localStorage (see AGENTS.md).
 export const themeStorageKey = "theme";
 
 export const themeNames: Record<Theme, string> = {

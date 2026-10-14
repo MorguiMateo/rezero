@@ -1,4 +1,5 @@
 import { data, Link } from "react-router";
+import { chapterKey, minShownPercent, useReadingProgress } from "@/lib/reading-progress";
 import { getVolume } from "@/lib/content/novels.server";
 import { buildMeta } from "@/lib/seo";
 import type { Route } from "./+types/novel-volume";
@@ -18,6 +19,25 @@ export function meta({ loaderData }: Route.MetaArgs) {
   });
 }
 
+// Empty in the prerendered HTML; fixed width so the titles never move when it fills in.
+function ChapterStatus({ work, volume, chapter }: { work: string; volume: string; chapter: string }) {
+  const saved = useReadingProgress()?.chapters[chapterKey(work, volume, chapter)];
+  return (
+    <span className="w-12 shrink-0 text-right font-ui text-sm text-muted">
+      {saved?.done ? (
+        <>
+          <span aria-hidden="true" className="text-primary">
+            ✓
+          </span>
+          <span className="sr-only">leído</span>
+        </>
+      ) : saved && saved.percent > minShownPercent ? (
+        `${saved.percent} %`
+      ) : null}
+    </span>
+  );
+}
+
 export default function NovelVolume({ loaderData: { volume } }: Route.ComponentProps) {
   const basePath = `/novela/${volume.work.slug}/${volume.slug}`;
   return (
@@ -34,9 +54,10 @@ export default function NovelVolume({ loaderData: { volume } }: Route.ComponentP
             <Link
               to={`${basePath}/${chapter.slug}`}
               prefetch="intent"
-              className="block py-3 font-ui text-foreground hover:text-primary"
+              className="flex items-baseline justify-between gap-4 py-3 font-ui text-foreground hover:text-primary"
             >
               {chapter.title}
+              <ChapterStatus work={volume.work.slug} volume={volume.slug} chapter={chapter.slug} />
             </Link>
           </li>
         ))}

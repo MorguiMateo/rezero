@@ -1,4 +1,5 @@
 import { data, Link } from "react-router";
+import { ContinueReading } from "@/components/continue-reading";
 import literataFont from "@fontsource-variable/literata/files/literata-latin-wght-normal.woff2?url";
 import { fontPreload } from "@/lib/font-preload";
 import { getWork } from "@/lib/content/novels.server";
@@ -29,6 +30,10 @@ export default function NovelWork({ loaderData: { work } }: Route.ComponentProps
       <h1 className="mt-6 font-display text-4xl font-medium text-foreground sm:text-5xl">{work.title}</h1>
       <p className="mt-2 font-ui text-sm uppercase tracking-[0.2em] text-muted">{work.author}</p>
       <p className="mt-6 font-reading text-lg text-foreground">{work.description}</p>
+      {/* Height reserved so the button appearing after hydration does not push the list down. */}
+      <div className="mt-6 min-h-10">
+        <ContinueReading work={work.slug} />
+      </div>
 
       <h2 className="mt-12 font-display text-2xl text-primary">Volúmenes</h2>
       <ol className="mt-4 divide-y divide-border border-y border-border">

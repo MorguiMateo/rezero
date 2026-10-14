@@ -5,6 +5,7 @@ import jetbrainsMonoFont from "@fontsource-variable/jetbrains-mono/files/jetbrai
 import literataFont from "@fontsource-variable/literata/files/literata-latin-wght-normal.woff2?url";
 import { BookCover, coverTones } from "@/components/book-cover";
 import { Carousel } from "@/components/carousel";
+import { LatestReading } from "@/components/continue-reading";
 import { PleiadesMark } from "@/components/pleiades-mark";
 import { fontPreload } from "@/lib/font-preload";
 import { getWorks } from "@/lib/content/novels.server";
@@ -85,11 +86,11 @@ export default function Home({ loaderData: { works } }: Route.ComponentProps) {
       {/* Night sky: two soft glows and a sparse field of stars. */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 -z-10 h-[46rem] bg-[radial-gradient(ellipse_70%_55%_at_50%_0%,color-mix(in_oklab,var(--color-primary-fill)_28%,transparent),transparent),radial-gradient(ellipse_40%_35%_at_85%_30%,color-mix(in_oklab,var(--color-accent-fill)_16%,transparent),transparent)]"
+        className="absolute inset-x-0 top-0 -z-10 h-[46rem] bg-[radial-gradient(ellipse_70%_55%_at_50%_0%,color-mix(in_oklab,var(--theme-primary-fill)_28%,transparent),transparent),radial-gradient(ellipse_40%_35%_at_85%_30%,color-mix(in_oklab,var(--theme-accent-fill)_16%,transparent),transparent)]"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 -z-10 h-[40rem] bg-[radial-gradient(var(--color-foreground)_1px,transparent_1.5px)] bg-size-[46px_46px] opacity-15 [mask-image:linear-gradient(to_bottom,black,transparent)]"
+        className="absolute inset-x-0 top-0 -z-10 h-[40rem] bg-[radial-gradient(var(--theme-foreground)_1px,transparent_1.5px)] bg-size-[46px_46px] opacity-15 [mask-image:linear-gradient(to_bottom,black,transparent)]"
       />
 
       <section className="flex flex-col items-center gap-6 px-6 pt-16 text-center sm:pt-24">
@@ -101,6 +102,10 @@ export default function Home({ loaderData: { works } }: Route.ComponentProps) {
         <p className="max-w-xl font-reading text-base text-muted sm:text-lg">
           La novela ligera y el manga de Re:Zero, ordenados como en los estantes de una biblioteca.
         </p>
+        {/* Height reserved so the link appearing after hydration does not push the shelves down. */}
+        <div className="flex min-h-10 w-full max-w-xl justify-center">
+          <LatestReading works={works} />
+        </div>
       </section>
 
       <div className="flex flex-col gap-14 px-3 sm:gap-20 sm:px-6">
@@ -121,6 +126,7 @@ export default function Home({ loaderData: { works } }: Route.ComponentProps) {
                     caption={`${work.volumeCount} ${work.volumeCount === 1 ? "volumen" : "volúmenes"}`}
                     tone={coverTones[index % coverTones.length]}
                     image={work.cover}
+                    appearance="outlined"
                     eager
                   />
                 </Link>

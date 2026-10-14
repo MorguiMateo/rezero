@@ -4,6 +4,7 @@ import { PleiadesMark } from "./pleiades-mark";
 export const coverTones = ["primary", "accent", "soft", "ornament", "badge"] as const;
 
 export type CoverTone = (typeof coverTones)[number];
+export type CoverAppearance = "default" | "outlined" | "halo";
 
 // Class names are written out in full so Tailwind can detect them.
 const toneTint: Record<CoverTone, string> = {
@@ -46,6 +47,7 @@ export function BookCover({
   tone,
   image,
   eager = false,
+  appearance = "default",
 }: {
   title: string;
   caption: string;
@@ -53,12 +55,23 @@ export function BookCover({
   image: ContentImage | null;
   // Covers visible on first load skip lazy loading so they do not pop in late.
   eager?: boolean;
+  appearance?: CoverAppearance;
 }) {
   return (
     <div className="relative aspect-[2/3] w-full">
+      {appearance === "halo" && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 right-1.5 bottom-1.5 rounded-l-sm rounded-r-md book-cover-halo"
+        />
+      )}
       <div
         aria-hidden="true"
-        className="absolute top-2 right-0 bottom-0 left-3 rounded-r-sm border border-border bg-surface bg-[repeating-linear-gradient(to_right,transparent_0_2px,var(--color-border)_2px_3px)]"
+        className={`absolute top-2 right-0 bottom-0 left-3 rounded-r-sm border ${
+          appearance === "outlined"
+            ? "book-cover-pages"
+            : "border-border bg-surface bg-[repeating-linear-gradient(to_right,transparent_0_2px,var(--theme-border)_2px_3px)]"
+        }`}
       />
       <div className="absolute inset-0 right-1.5 bottom-1.5 overflow-hidden rounded-l-sm rounded-r-md bg-header text-header-foreground shadow-xl shadow-black/40">
         {image ? (
@@ -83,6 +96,12 @@ export function BookCover({
         >
           {caption}
         </p>
+        {appearance === "outlined" && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-l-sm rounded-r-md book-cover-outline"
+          />
+        )}
       </div>
     </div>
   );

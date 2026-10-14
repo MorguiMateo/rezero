@@ -17,7 +17,7 @@ Referencias: [prerender de React Router](https://reactrouter.com/how-to/pre-rend
 - Base de routing, metadatos, ESLint, TypeScript y preview local de Cloudflare.
 - Recorrido de novela prerenderizado: obra → volumen → capítulo con navegación anterior/siguiente, leído desde el submódulo `content/` (por ahora con contenido de ejemplo).
 - Todavía no hay catálogo, lector de manga, conversión de EPUB ni botón de cambio de tema.
-- Fuera de alcance: cuentas, sesión, progreso, favoritos, historial y preferencias guardadas. El tema se cambia con un botón de personajes (Satella → Emilia → Beatrice → Subaru → Echidna → Rem → Shaula → Ram) y se guarda en `localStorage`, aplicado antes del primer pintado por un script inline; por defecto, Satella.
+- Progreso de lectura solo en el navegador (`localStorage`, `src/lib/reading-progress.ts`): posición, capítulos leídos y «Continuar leyendo». Fuera de alcance: cuentas, sesión, sincronización, favoritos, historial y otras preferencias guardadas. El tema se cambia con un botón de personajes (Satella → Emilia → Beatrice → Subaru → Echidna → Rem → Shaula → Ram) y se guarda en `localStorage`, aplicado antes del primer pintado por un script inline; por defecto, Satella.
 - No se ha desplegado en producción ni configurado bucket, dominio o CI/CD. No habrá backend.
 
 ## Requisitos técnicos

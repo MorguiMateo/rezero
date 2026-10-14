@@ -18,6 +18,14 @@
   --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
 }
 
+/* Animate the radius rather than native clip-path to keep overlapping theme
+   waves in CSS pixels even on high-DPI displays. */
+@property --theme-wave-radius {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
 /* Display title gradient in the active character's colors (see themes.css). */
 @utility title-gradient-text {
   background-image: var(--theme-title-gradient);
@@ -25,41 +33,44 @@
   color: transparent;
 }
 
+/* Cover treatments read semantic colors in their own theme wrapper. */
+@utility book-cover-outline {
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--theme-border) 60%, var(--theme-foreground));
+}
+
+@utility book-cover-pages {
+  border-color: color-mix(in oklab, var(--theme-border) 60%, var(--theme-foreground));
+  background-color: color-mix(in oklab, var(--theme-surface) 70%, var(--theme-foreground));
+  background-image: repeating-linear-gradient(to right, transparent 0 2px, var(--theme-border) 2px 3px);
+}
+
+@utility book-cover-halo {
+  box-shadow: 0 0 20px 2px color-mix(in oklab, var(--theme-primary) 18%, transparent);
+}
+
 @layer base {
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: var(--theme-background);
+    color: var(--theme-foreground);
     font-family: var(--font-ui);
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--color-focus) 45%, transparent);
+    background-color: color-mix(in oklab, var(--theme-focus) 45%, transparent);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-focus);
+    outline: 2px solid var(--theme-focus);
     outline-offset: 3px;
   }
 }
 
-/* Keep the old theme intact while a circular mask reveals the new snapshot. */
-html[data-theme-transition]::view-transition-group(root),
-html[data-theme-transition]::view-transition-old(root),
-html[data-theme-transition]::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-
-html[data-theme-transition]::view-transition-old(root) {
-  z-index: 1;
-}
-
-html[data-theme-transition]::view-transition-new(root) {
-  z-index: 2;
-}
-
-html[data-theme-transition]::view-transition {
-  pointer-events: none;
+/* On for one style pass while a theme switch lands, so the page changes colors at
+   once instead of running component transitions (see src/lib/theme-transition.ts). */
+html[data-theme-landing] *,
+html[data-theme-landing] *::before,
+html[data-theme-landing] *::after {
+  transition: none !important;
 }
 
 /* Reading typography for chapter HTML rendered from Markdown at build time. */
@@ -67,14 +78,19 @@ html[data-theme-transition]::view-transition {
   font-family: var(--font-reading);
   font-size: 1.125rem;
   line-height: 1.8;
-  color: var(--color-foreground);
+  color: var(--theme-foreground);
+
+  /* Room above the block the reader resumes at (the reader bar hides on the jump down). */
+  & > * {
+    scroll-margin-top: 1.5rem;
+  }
 
   & p {
     margin-block: 1em;
   }
 
   & a {
-    color: var(--color-primary);
+    color: var(--theme-primary);
   }
 
   /* Scene breaks (*** in Markdown). */
@@ -88,7 +104,7 @@ html[data-theme-transition]::view-transition {
 
   & hr::after {
     content: "◆ ◆ ◆";
-    color: var(--color-muted);
+    color: var(--theme-muted);
     letter-spacing: 0.5em;
   }
 
@@ -103,12 +119,18 @@ html[data-theme-transition]::view-transition {
     line-height: 0;
   }
 
+  /* Going back up from a footnote brings the reader bar (3.5rem) back over the top,
+     so the reference lands below it with a line of context above. */
+  & [data-footnote-ref] {
+    scroll-margin-top: 6rem;
+  }
+
   & .footnotes {
     margin-top: 3em;
     padding-top: 1em;
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid var(--theme-border);
     font-size: 0.9em;
-    color: var(--color-muted);
+    color: var(--theme-muted);
   }
 
   & .footnotes h2 {

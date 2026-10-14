@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useMatches } from "react-router";
 import cormorantFont from "@fontsource-variable/cormorant/files/cormorant-latin-wght-normal.woff2?url";
 import jostFont from "@fontsource-variable/jost/files/jost-latin-wght-normal.woff2?url";
 import { SiteHeader } from "@/components/site-header";
@@ -17,7 +17,13 @@ export const links: Route.LinksFunction = () => [
   { rel: "stylesheet", href: fontsStylesheet },
 ];
 
+// Routes that export handle = { readingMode: true } get their own reader bar instead of the site header.
+function useReadingMode() {
+  return useMatches().some((match) => (match.handle as { readingMode?: boolean } | undefined)?.readingMode);
+}
+
 export function Layout({ children }: { children: ReactNode }) {
+  const readingMode = useReadingMode();
   return (
     // The <head> script may change data-theme before hydration; that is expected.
     <html lang="es" data-theme={defaultTheme} className="h-full antialiased" suppressHydrationWarning>
@@ -32,7 +38,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <Links />
       </head>
       <body className="min-h-full flex flex-col">
-        <SiteHeader />
+        {!readingMode && <SiteHeader />}
         <main id="contenido-principal" className="flex flex-1 flex-col">
           {children}
         </main>

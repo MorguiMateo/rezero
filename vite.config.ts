@@ -14,6 +14,42 @@ const imageContentTypes: Record<string, string> = {
   ".svg": "image/svg+xml",
 };
 
+// React Router resolves prerender paths when the dev server starts. Content is
+// read with fs, outside Vite's module graph, so imports must refresh that list.
+function contentReload(): Plugin {
+  return {
+    name: "content-reload",
+    configureServer(server) {
+      const novelsDirectory = path.resolve("content", "novela");
+      const imageManifestFile = path.resolve("content", "images.json");
+      let restartTimer: ReturnType<typeof setTimeout> | undefined;
+
+      function onContentChange(event: string, file: string) {
+        if (!["add", "change", "unlink"].includes(event)) return;
+        const absoluteFile = path.resolve(file);
+        const isNovelData =
+          absoluteFile.startsWith(novelsDirectory + path.sep) && /\.(md|yaml)$/.test(absoluteFile);
+        if (!isNovelData && absoluteFile !== imageManifestFile) return;
+
+        clearTimeout(restartTimer);
+        restartTimer = setTimeout(() => {
+          server.config.logger.info("Content changed; refreshing prerender routes.");
+          void server.restart().catch((error: unknown) => {
+            server.config.logger.error(`Content reload failed: ${String(error)}`);
+          });
+        }, 300);
+      }
+
+      server.watcher.add([novelsDirectory, imageManifestFile]);
+      server.watcher.on("all", onContentChange);
+      server.httpServer?.once("close", () => {
+        clearTimeout(restartTimer);
+        server.watcher.off("all", onContentChange);
+      });
+    },
+  };
+}
+
 // Publishes content/images/ under /img: served from disk in dev, copied into
 // build/client so it ships as static assets with the site.
 function contentImages(): Plugin {
@@ -42,7 +78,7 @@ function contentImages(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [tailwindcss(), reactRouter(), contentImages()],
+  plugins: [tailwindcss(), reactRouter(), contentImages(), contentReload()],
   build: {
     // Theme portraits (about 24 KB in total) go inside the stylesheet so the
     // theme button never shows an empty circle while its image loads.

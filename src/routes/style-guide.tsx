@@ -1,5 +1,9 @@
 import type { MetaFunction } from "react-router";
+import { BookCover, type CoverAppearance } from "@/components/book-cover";
+import { getWorks } from "@/lib/content/novels.server";
+import type { WorkSummary } from "@/lib/content/types";
 import { themeNames, themes, type Theme } from "@/lib/theme";
+import type { Route } from "./+types/style-guide";
 
 // Temporary page to review the design system; delete once it is approved.
 export const meta: MetaFunction = () => [
@@ -7,6 +11,21 @@ export const meta: MetaFunction = () => [
   { name: "description", content: "Paletas, temas y tipografía de Biblioteca de Pléyades." },
   { name: "robots", content: "noindex, nofollow" },
 ];
+
+export async function loader() {
+  const work = (await getWorks()).find((work) => work.cover !== null);
+  return {
+    sampleWork: work ? { title: work.title, cover: work.cover, volumeCount: work.volumeCount } : null,
+  };
+}
+
+const comparisonThemes = ["satella", "beatrice", "echidna", "shaula", "emilia", "subaru", "rem", "ram"] as const satisfies readonly Theme[];
+const coverVariants = [
+  { appearance: "outlined", label: "A · Borde y canto" },
+  { appearance: "halo", label: "B · Halo suave" },
+] as const satisfies readonly { appearance: CoverAppearance; label: string }[];
+
+type SampleWork = Pick<WorkSummary, "title" | "cover" | "volumeCount">;
 
 type Swatch = { token: string; hex: string; className: string; usage: string };
 
@@ -311,7 +330,77 @@ function ThemePreview({ palette }: { palette: CharacterPalette }) {
   );
 }
 
-export default function StyleGuide() {
+function CoverComparison({ sampleWork }: { sampleWork: SampleWork | null }) {
+  const title = sampleWork?.title ?? "Biblioteca de Pléyades";
+  const caption = sampleWork
+    ? `${sampleWork.volumeCount} ${sampleWork.volumeCount === 1 ? "volumen" : "volúmenes"}`
+    : "Novela ligera";
+
+  return (
+    <section id="comparativa-portadas" className="scroll-mt-24">
+      <SectionTitle>Comparativa de portadas</SectionTitle>
+      <p className="mb-6 font-ui text-muted">
+        Compara el contorno y las páginas más claras con un halo suave. El inicio utiliza la versión A.
+      </p>
+      <nav aria-label="Temas de la comparativa" className="mb-8 flex flex-wrap gap-x-6 gap-y-3">
+        {comparisonThemes.map((theme) => (
+          <a key={theme} href={`#portadas-${theme}`} className="text-primary underline underline-offset-4">
+            {themeNames[theme]}
+          </a>
+        ))}
+      </nav>
+      <div className="space-y-10">
+        {comparisonThemes.map((theme, index) => (
+          <section
+            key={theme}
+            id={`portadas-${theme}`}
+            data-theme={theme}
+            aria-labelledby={`portadas-${theme}-titulo`}
+            className="scroll-mt-24 rounded-xl border border-border bg-background p-4 text-foreground sm:p-6"
+          >
+            <h3 id={`portadas-${theme}-titulo`} className="mb-6 font-display text-3xl text-primary">
+              {themeNames[theme]} · {index < 4 ? "Oscuro" : "Claro"}
+            </h3>
+            <div className="grid gap-6 md:grid-cols-2">
+              {coverVariants.map((variant) => (
+                <article key={variant.appearance} className="bg-surface/75 p-6 sm:p-8">
+                  <h4 className="text-center font-ui text-lg">{variant.label}</h4>
+                  <div className="mt-6 flex flex-wrap justify-center gap-8">
+                    {sampleWork?.cover && (
+                      <figure className="w-40 shrink-0 sm:w-44">
+                        <figcaption className="mb-4 text-center text-sm text-muted">Portada real</figcaption>
+                        <BookCover
+                          title={title}
+                          caption={caption}
+                          tone="primary"
+                          image={sampleWork.cover}
+                          appearance={variant.appearance}
+                          eager={index === 0}
+                        />
+                      </figure>
+                    )}
+                    <figure className="w-40 shrink-0 sm:w-44">
+                      <figcaption className="mb-4 text-center text-sm text-muted">Portada genérica</figcaption>
+                      <BookCover
+                        title={title}
+                        caption={caption}
+                        tone="primary"
+                        image={null}
+                        appearance={variant.appearance}
+                      />
+                    </figure>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export default function StyleGuide({ loaderData: { sampleWork } }: Route.ComponentProps) {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-16 px-6 py-16">
       <header className="space-y-3 text-center">
@@ -322,6 +411,8 @@ export default function StyleGuide() {
           Biblioteca de Pléyades
         </h1>
       </header>
+
+      <CoverComparison sampleWork={sampleWork} />
 
       <section>
         <SectionTitle>Paletas por personaje</SectionTitle>

@@ -2,7 +2,8 @@
    border-border, ...). Their values come from the active theme below, so a
    theme switch only changes the data-theme attribute on <html> or any wrapper.
    inline: utilities must read var(--theme-*) where they are used, not at :root,
-   so nested data-theme wrappers work. */
+   so nested data-theme wrappers work. For the same reason, custom CSS and
+   arbitrary values use var(--theme-*), never var(--color-*). */
 @theme inline {
   --color-background: var(--theme-background);
   --color-surface: var(--theme-surface);

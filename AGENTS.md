@@ -4,11 +4,11 @@
 - **File names:** use `kebab-case` (e.g. `user-profile.tsx`, `format-date.ts`).
 - **Variables and functions:** use `camelCase` (e.g. `userName`, `getUserById`).
 - **Design tokens:** Tailwind theme tokens (colors, fonts) and custom `@utility` names must be in English and `kebab-case` (e.g. `emilia-violet-500`, `font-reading`). User-facing text stays in Spanish.
-- **Colors and themes:** raw character palettes live in `src/styles/palettes.css` (one commented block per character); themes live in `src/styles/themes.css` and are selected with `data-theme` (Satella is the default). A single header button shows the current character's image and cycles themes on each click (Satella → Emilia → Beatrice → Subaru → Echidna → Rem → Shaula → Ram → Satella; dark and light alternate, each group ordered from most to least protagonist); the choice is saved in `localStorage` (the only allowed use of `localStorage`) and applied before first paint by a tiny inline script in `<head>` (see section 1). Components must use the semantic tokens (`bg-background`, `text-foreground`, `text-primary`, `bg-button`…), never raw palette tokens like `bg-rem-hair`, so every theme keeps working.
+- **Colors and themes:** raw character palettes live in `src/styles/palettes.css` (one commented block per character); themes live in `src/styles/themes.css` and are selected with `data-theme` (Satella is the default). A single header button shows the current character's image and cycles themes on each click (Satella → Emilia → Beatrice → Subaru → Echidna → Rem → Shaula → Ram → Satella; dark and light alternate, each group ordered from most to least protagonist); the choice is saved in `localStorage` (allowed only for the theme and the reading progress, see section 1) and applied before first paint by a tiny inline script in `<head>` (see section 1). Components must use the semantic tokens (`bg-background`, `text-foreground`, `text-primary`, `bg-button`…), never raw palette tokens like `bg-rem-hair`, so every theme keeps working.
 
 # Reglas de arquitectura: pre-render con React Router sobre Cloudflare
 
-Este proyecto es un lector de novela ligera y manga. El contenido se pre-renderiza durante el build y se sirve como estático desde Cloudflare. No hay cuentas, sesión, progreso, favoritos ni historial; la única preferencia guardada es el tema.
+Este proyecto es un lector de novela ligera y manga. El contenido se pre-renderiza durante el build y se sirve como estático desde Cloudflare. No hay cuentas, sesión, favoritos ni historial; en el navegador solo se guardan el tema y el progreso de lectura.
 
 ## Stack (no cambiar sin preguntar)
 
@@ -36,10 +36,11 @@ Estático, siempre pre-renderizado:
 Dinámico, solo en el cliente:
 
 - Cambio de tema con el botón de personajes, guardado en `localStorage`. Sin valor guardado, el tema es Satella.
+- Progreso de lectura de novela, guardado solo en el navegador (`localStorage`, clave `reading-progress`, acceso único mediante `src/lib/reading-progress.ts`): posición por bloque de cada capítulo, capítulos terminados y último capítulo por obra. Se usa para el aviso «Continuar donde lo dejaste», «Continuar leyendo» y las marcas del índice. Se lee después de hidratar; el HTML prerenderizado nunca depende de él.
 
 Fuera de alcance (no implementar sin preguntar):
 
-- Cuentas, inicio de sesión, progreso de lectura, favoritos, historial y cualquier otra preferencia guardada (tamaño de letra, etc.). No usar `localStorage` para nada salvo el tema, ni cookies ni APIs.
+- Cuentas, inicio de sesión, sincronización entre dispositivos, favoritos, historial y cualquier otra preferencia guardada (tamaño de letra, etc.). No usar `localStorage` para nada salvo el tema y el progreso de lectura, ni cookies ni APIs.
 
 Reglas:
 
