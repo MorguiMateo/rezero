@@ -20,7 +20,8 @@ function Diamond({ className }: { className: string }) {
 }
 
 // Generic cover drawn with semantic tokens, so every theme recolors it.
-function GenericCover({ title, tone }: { title: string; tone: CoverTone }) {
+// As a placeholder it is hidden from screen readers, since the image already has the title as alt text.
+function GenericCover({ title, tone, placeholder }: { title: string; tone: CoverTone; placeholder: boolean }) {
   return (
     <>
       <div aria-hidden="true" className={`absolute inset-0 bg-linear-to-br ${toneTint[tone]} via-transparent to-black/35`} />
@@ -31,7 +32,10 @@ function GenericCover({ title, tone }: { title: string; tone: CoverTone }) {
         <Diamond className="-right-[3.5px] -bottom-[3.5px]" />
       </div>
       <div aria-hidden="true" className="absolute inset-4 left-6.5 border border-header-accent/20" />
-      <div className="relative flex h-full flex-col items-center px-7 pt-8 pb-14 pl-8 text-center">
+      <div
+        aria-hidden={placeholder || undefined}
+        className="relative flex h-full flex-col items-center px-7 pt-8 pb-14 pl-8 text-center"
+      >
         <PleiadesMark className="h-8 w-auto text-header-accent drop-shadow" />
         <p className="mt-auto font-display text-lg leading-tight font-semibold text-balance sm:text-xl">{title}</p>
         <span aria-hidden="true" className="mt-2 h-px w-10 bg-header-accent/60" />
@@ -74,7 +78,9 @@ export function BookCover({
         }`}
       />
       <div className="absolute inset-0 right-1.5 bottom-1.5 overflow-hidden rounded-l-sm rounded-r-md bg-header text-header-foreground shadow-xl shadow-black/40">
-        {image ? (
+        {/* Also the placeholder behind a cover image, so the book never looks empty while it loads. */}
+        <GenericCover title={title} tone={tone} placeholder={image !== null} />
+        {image && (
           <img
             src={image.src}
             width={image.width}
@@ -84,8 +90,6 @@ export function BookCover({
             decoding="async"
             className="absolute inset-0 size-full object-cover"
           />
-        ) : (
-          <GenericCover title={title} tone={tone} />
         )}
         <div aria-hidden="true" className="absolute inset-y-0 left-0 w-3 bg-linear-to-r from-black/50 to-transparent" />
         <div aria-hidden="true" className="absolute inset-y-0 left-3 w-px bg-white/15" />
