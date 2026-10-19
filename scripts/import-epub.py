@@ -64,30 +64,49 @@ def plainText(value):
 
 def moveEdgePunctuation(inlines):
     def isWord(node, edge):
+        # A word, or emphasis that ends (or starts) with one: "**muerte***." cannot open either.
+        if isinstance(node, dict) and node.get("t") in ("Emph", "Strong") and node["c"]:
+            return isWord(node["c"][edge], edge)
         return (isinstance(node, dict) and node.get("t") == "Str" and node["c"]
                 and node["c"][edge].isalnum())
+    def isSpace(node):
+        return isinstance(node, dict) and node.get("t") in ("Space", "SoftBreak")
     result = list(inlines)
+    output = []
     for index, node in enumerate(result):
         if not (isinstance(node, dict) and node.get("t") in ("Emph", "Strong") and node["c"]):
+            output.append(node)
             continue
         inner = node["c"]
         after = result[index + 1] if index + 1 < len(result) else None
-        before = result[index - 1] if index else None
-        last, first = inner[-1], inner[0]
+        before = output[-1] if output else None
+        prefix, suffix = [], []
+        last = inner[-1]
         if isWord(after, 0) and last.get("t") == "Str" and not last["c"][-1].isalnum():
             match = re.search(r"[^\w]+$", last["c"])
             moved, last["c"] = match.group(), last["c"][:match.start()]
-            after["c"] = moved + after["c"]
             if not last["c"]:
                 inner.pop()
-        if isWord(before, -1) and first.get("t") == "Str" and inner and not first["c"][0].isalnum():
+            if after.get("t") == "Str":
+                after["c"] = moved + after["c"]
+            else:
+                suffix = [{"t": "Str", "c": moved}]
+            while inner and isSpace(inner[-1]):
+                suffix.insert(0, inner.pop())
+        first = inner[0] if inner else None
+        if first and isWord(before, -1) and first.get("t") == "Str" and not first["c"][0].isalnum():
             match = re.match(r"[^\w]+", first["c"])
             moved, first["c"] = match.group(), first["c"][match.end():]
-            before["c"] = before["c"] + moved
             if not first["c"]:
                 inner.pop(0)
-    return [node for node in result if not (isinstance(node, dict) and node.get("t") in ("Emph", "Strong")
-                                            and not node["c"])]
+            if before.get("t") == "Str":
+                before["c"] = before["c"] + moved
+            else:
+                prefix = [{"t": "Str", "c": moved}]
+            while inner and isSpace(inner[0]):
+                prefix.append(inner.pop(0))
+        output.extend(prefix + ([node] if inner else []) + suffix)
+    return output
 
 
 def trimBreaks(inlines, edge):
@@ -110,6 +129,16 @@ def trimBreaks(inlines, edge):
         else:
             break
     return inlines
+
+
+def withoutNotes(value):
+    if isinstance(value, list):
+        return [withoutNotes(child) for child in value
+                if not (isinstance(child, dict) and child.get("t") == "Link"
+                        and child["c"][2][0].startswith("epub-note:"))]
+    if isinstance(value, dict):
+        return {key: withoutNotes(child) for key, child in value.items()}
+    return value
 
 
 def normalizeAst(value, noteBlocks, noteCounts):
@@ -143,7 +172,8 @@ def normalizeAst(value, noteBlocks, noteCounts):
         value = {"t": kind, "c": trimBreaks(trimBreaks(value["c"], 0), -1)}
     # Emphasis on punctuation alone (a closing quote, a lone "!") can become literal
     # * or ** in CommonMark. Keep every character, but discard that publisher decoration.
-    if kind in ("Emph", "Strong", "Underline") and not any(character.isalnum() for character in plainText(value["c"])):
+    # A note marker alone in bold or italics ("*palabra**[^2]***") counts as no text either.
+    if kind in ("Emph", "Strong", "Underline") and not any(character.isalnum() for character in plainText(withoutNotes(value["c"]))):
         return {"t": "Span", "c": [["", [], []], normalizeAst(value["c"], noteBlocks, noteCounts)]}
     # ATX headings cannot hold hard line breaks; read them as spaces.
     if kind == "Header":
@@ -185,6 +215,24 @@ def removeKeepingTail(parent, child):
         else:
             parent.text = (parent.text or "") + child.tail
     parent.remove(child)
+
+
+def unwrap(parent, child):
+    """Replace an element by its content, keeping text and tail in place."""
+    index = list(parent).index(child)
+    grandchildren = list(child)
+    if child.text:
+        if index:
+            parent[index - 1].tail = (parent[index - 1].tail or "") + child.text
+        else:
+            parent.text = (parent.text or "") + child.text
+    for offset, grandchild in enumerate(grandchildren):
+        parent.insert(index + offset, grandchild)
+    if grandchildren:
+        grandchildren[-1].tail = (grandchildren[-1].tail or "") + (child.tail or "")
+        parent.remove(child)
+    else:
+        removeKeepingTail(parent, child)
 
 
 def webpSize(data):
@@ -262,12 +310,24 @@ def importEpub(epubPath, recipePath, outputPath, quality=None):
                        if element.get("id") and element.tag.split("}")[-1] in ("li", "aside")]
             anchors = [link for link in noteDocument.findall(".//{*}a[@id]")
                        if not any(holder in linkAncestors(link, parents) for holder in holders)]
+            # A note split across paragraphs can repeat its anchor id; the note is then the
+            # closest element that holds every copy (the editor's <div class="nota">).
+            split = {noteId: links for noteId in {link.get("id") for link in anchors}
+                     if len(links := [link for link in anchors if link.get("id") == noteId]) > 1}
             for link in holders + anchors:
                 noteId = link.get("id")
+                if noteId in split and link is not split[noteId][0]:
+                    continue
                 if noteId in noteBlocks:
                     raise ValueError(f"Duplicate translator note: {noteId}")
                 element = link
-                while element.tag.split("}")[-1] not in ("li", "p", "aside"):
+                if noteId in split:
+                    element = next(ancestor for ancestor in linkAncestors(link, parents)
+                                   if all(ancestor in linkAncestors(other, parents) for other in split[noteId]))
+                    for anchor in element.findall(".//{*}a"):
+                        unwrap(parents[anchor], anchor)
+                    parents = {child: parent for parent in noteDocument.iter() for child in parent}
+                while element.tag.split("}")[-1] not in ("li", "p", "aside", "div"):
                     element = parents[element]
                 # Some editions repeat the note number ("[1]") before its text.
                 for marker in element.findall(".//{*}sup"):
@@ -314,7 +374,9 @@ def importEpub(epubPath, recipePath, outputPath, quality=None):
                             element.tag = "span"
                             element.attrib.clear()
                         elif recipe.get("notes") and target.fragment and archivePath(sourcePath, href) == recipe["notes"]:
-                            element.set("href", f"epub-note:{target.fragment}")
+                            # "noteLinks" repairs markers that point at the wrong note ("<file>#<marker id>": note id).
+                            noteId = recipe.get("noteLinks", {}).get(f"{sourcePath}#{element.get('id')}", target.fragment)
+                            element.set("href", f"epub-note:{noteId}")
                         elif archivePath(sourcePath, href) not in spine:
                             raise ValueError(f"Unexpected link: {href}")
                         else:
@@ -365,7 +427,11 @@ def importEpub(epubPath, recipePath, outputPath, quality=None):
             report.append({"slug": group["slug"], "parts": len(group["files"]),
                            "images": before["Image"], "notes": before["Note"],
                            "characters": len(plainText(combined["blocks"]))})
-        if set(noteCounts) != set(noteBlocks) or any(count != 1 for count in noteCounts.values()):
+        # "unusedNotes" lists template leftovers ("[2] TEXTO") that no chapter links to.
+        expectedNotes = set(noteBlocks) - set(recipe.get("unusedNotes", []))
+        # "sharedNotes" lists notes the edition links from more than one place on purpose.
+        shared = set(recipe.get("sharedNotes", []))
+        if set(noteCounts) != expectedNotes or any(count != 1 for note, count in noteCounts.items() if note not in shared):
             raise ValueError("Missing or repeated translator notes")
         workPath = outputPath / "novela" / recipe["workSlug"]
         writeYaml(workPath / "work.yaml", recipe["work"])

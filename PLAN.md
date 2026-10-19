@@ -12,13 +12,17 @@ Referencias: [prerender de React Router](https://reactrouter.com/how-to/pre-rend
 
 ## Estado y alcance
 
-- Home provisional (lista de obras) y `/estilos`, con HTML prerenderizado. Siguiente paso: layout global y diseño de la home (ver "Fases por sección").
-- Se conservan paletas y temas Satella, Emilia, Beatrice, Subaru, Echidna, Rem, Shaula y Ram, tokens semánticos y tipografías Cormorant, Jost, Literata y JetBrains Mono; fuentes locales empaquetadas con Fontsource.
-- Base de routing, metadatos, ESLint, TypeScript y preview local de Cloudflare.
-- Recorrido de novela prerenderizado: obra → volumen → capítulo con navegación anterior/siguiente, leído desde el submódulo `content/` (por ahora con contenido de ejemplo).
-- Todavía no hay catálogo, lector de manga, conversión de EPUB ni botón de cambio de tema.
-- Progreso de lectura solo en el navegador (`localStorage`, `src/lib/reading-progress.ts`): posición, capítulos leídos y «Continuar leyendo». Fuera de alcance: cuentas, sesión, sincronización, favoritos, historial y otras preferencias guardadas. El tema se cambia con un botón de personajes (Satella → Emilia → Beatrice → Subaru → Echidna → Rem → Shaula → Ram) y se guarda en `localStorage`, aplicado antes del primer pintado por un script inline; por defecto, Satella.
-- No se ha desplegado en producción ni configurado bucket, dominio o CI/CD. No habrá backend.
+Estado al 19 de octubre de 2026.
+
+- Publicado en https://biblioteca-de-pleyades.morguimateo1.workers.dev. Cada push a `main` pasa lint, typecheck y build en GitHub Actions y se despliega con `wrangler deploy` (`.github/workflows/deploy.yml`). Sin dominio propio ni backend.
+- Home con carruseles de obras, portadas (o portada genérica con los colores del tema) y etiqueta por obra; `/estilos` como guía de estilo.
+- Recorrido de novela prerenderizado: obra → volumen → capítulo con navegación anterior/siguiente (también entre volúmenes), leído desde el submódulo `content/`.
+- Contenido (todo de un único paquete de EPUB, ver `content/PENDIENTES.md`): novela ligera `re-zero` (tomos 1–31), novela web `re-zero-novela-web` (interludios del arco 3, arco 4, *One Day II* y volúmenes 16–43), `re-zero-precuelas` (6 novelas) y `re-zero-what-if` (7 historias). La novela ligera y la novela web son obras separadas y no se mezclan.
+- Importador offline: `scripts/import-epub.py` (EPUB → Markdown con pandoc). Escribe en un directorio de staging nuevo, nunca en `content/`.
+- Temas Satella, Emilia, Beatrice, Subaru, Echidna, Rem, Shaula y Ram con botón de personajes, tokens semánticos y fuentes Cormorant, Jost, Literata y JetBrains Mono empaquetadas con Fontsource.
+- Progreso de lectura solo en el navegador (`localStorage`, `src/lib/reading-progress.ts`): posición, capítulos leídos, «Continuar donde lo dejaste» y «Continuar leyendo». Modo lectura en el capítulo. Fuera de alcance: cuentas, sesión, sincronización, favoritos, historial y otras preferencias guardadas.
+- Imágenes de novela servidas en `/img/` con el propio sitio (no R2), en WebP calidad 90 (los originales son JPG). Cada obra tiene una miniatura `portada-mini.webp` para el inicio.
+- Todavía no hay catálogo `/novela`, manga ni página 404 propia.
 
 ## Requisitos técnicos
 
@@ -36,12 +40,12 @@ Referencias: [prerender de React Router](https://reactrouter.com/how-to/pre-rend
 - Servir `build/client` mediante Workers Static Assets y `wrangler.jsonc`.
 - `html_handling: "drop-trailing-slash"`, `not_found_handling: "none"`.
 - No implementar un Worker SSR ni backend/API.
-- Definir cuenta, dominio del sitio, bucket R2 y dominio propio de imágenes antes del despliegue real.
+- Hoy en `*.workers.dev`; un dominio propio queda como decisión pendiente.
 - Build + deploy para publicar capítulos. Automatizar detección de novedades posteriormente.
 
 ### 3. Imágenes y assets
 
-- Descargar imágenes de contenido, convertirlas a WebP y subirlas a R2, no al repositorio ni a `public/`.
+- Imágenes de novela en WebP dentro de `content/images/` (repo privado), publicadas en `/img/`; páginas de manga en Workers de assets aparte. Nunca en el repo de la app ni en `public/`.
 - Usar tamaños explícitos, lazy loading fuera del viewport inicial y prioridad para imágenes LCP/primeras páginas del manga.
 - `<picture>` cuando se necesiten variantes o fallbacks; no procesar imágenes en runtime.
 - Mantener code splitting por ruta y carga diferida de componentes no críticos.
@@ -53,7 +57,7 @@ Referencias: [prerender de React Router](https://reactrouter.com/how-to/pre-rend
 - Prefetch selectivo mediante `<Link prefetch="intent">` o `viewport` según el flujo, sin precargar todo el catálogo. El enlace actual a `/estilos` usa `intent`.
 - Definir y medir políticas de caché: assets con hash pueden ser immutable; HTML y `.data` deben mantenerse coherentes al publicar contenido nuevo. No imponer TTLs largos sin verificar actualización.
 - Evaluar Brotli y métricas reales en Cloudflare; agregar Web Vitals posteriormente.
-- Preconnect/DNS-prefetch solo para dominios externos realmente utilizados (por ejemplo, el futuro dominio R2).
+- Preconnect/DNS-prefetch solo para dominios externos realmente utilizados (por ejemplo, los futuros `*.workers.dev` del manga).
 
 ## Referencia de diseño
 
@@ -71,7 +75,7 @@ Se trabaja una sección de la página a la vez: diseño → datos que necesita �
 - [x] Capa `src/lib/content/` y recorrido obra → volumen → capítulo con contenido de ejemplo, todas las URLs en `prerender`.
 - [x] Paletas, temas y fuentes autoalojadas; guía en `/estilos`.
 
-### Sección 1: Cabecera global — en curso, junto con la home
+### Sección 1: Cabecera global ✅ (salvo menú móvil)
 
 La comparten todas las páginas, por eso va primero. No hay pie de página.
 
@@ -84,7 +88,7 @@ Referencia en ranoa.lat: barra fija con el logo a la izquierda y la navegación 
 - [ ] Móvil: botón de menú (hamburguesa) y botón de tema en cuadros con borde; menú desplegable accesible, sin librerías. **Por decidir:** hoy los tres enlaces caben a 360 px y en móvil el logo queda solo con las estrellas.
 - [x] Logo: siete estrellas de las Pléyades + nombre (`pleiades-mark.tsx`, `public/favicon.svg`). Botón de tema: iconos circulares estilo Crunchyroll tomados de los iconos oficiales de la [web del anime](https://re-zero-anime.jp/tv/character/) (Emilia: ficha actual; Rem y Ram: temporada 1; Subaru: arco 6; Beatrice, Echidna y Shaula: ficha actual). Satella no tiene ficha oficial: su icono es un recorte de un fotograma del anime (temporada 2) tomado de la wiki de Fandom, 96×96 WebP en `public/characters/`. Son imágenes con copyright (© Nagatsuki/KADOKAWA); se usan por decisión del usuario.
 
-### Sección 2: Home (`/`) — en curso
+### Sección 2: Home (`/`) — casi terminada
 
 Referencia en ranoa.lat, de arriba abajo:
 
@@ -100,20 +104,22 @@ El HTML prerenderizado debe incluir todas las tarjetas. El carrusel funciona con
 
 Datos:
 
-- [ ] Ampliar `work.yaml` con `category` (enum de tipos) y `order` para ordenar el carrusel, y validarlos en `novels.server.ts`.
-- [ ] Exponer en `WorkSummary` el número de volúmenes, calculado a partir del contenido.
-- [ ] `cover` opcional en `work.yaml` (ruta R2 + `content/images.json`). Sin portada, el libro se dibuja con CSS en los colores del tema y el título sobre la tapa.
+- [x] `label` opcional en `work.yaml` (texto libre: «Principal», «Precuela»…) sobre cada libro.
+- [ ] Ampliar `work.yaml` con `order` para ordenar el carrusel (y, si hace falta filtrar, `category` como enum), validados en `novels.server.ts`.
+- [x] Exponer en `WorkSummary` el número de volúmenes (`volumeCount`), calculado a partir del contenido.
+- [x] `cover` opcional en `work.yaml` (ruta dentro de `content/images/` + `content/images.json`; la home usa `portada-mini.webp`). Sin portada, el libro se dibuja con CSS en los colores del tema y el título sobre la tapa.
 
 Implementación:
 
-- [ ] Componentes `hero-section`, `collection-panel`, `book-card` y `work-carousel`.
+- [x] Paneles con borde (`FramedSection` en `home.tsx`), `book-cover` y `carousel`; «Continuar leyendo» arriba.
+- [ ] Hero con escena de fondo.
 - [ ] Decoración (bordes, separadores, rosa de los vientos) en CSS/SVG con tokens semánticos, para que funcione en los cuatro temas.
 - [ ] **Necesito del usuario:** imagen de fondo del hero (asset de interfaz en `public/`, optimizada a WebP). Mientras tanto, degradado del tema.
 - [ ] `meta` de la home con título, descripción y Open Graph.
 
 Verificación:
 
-- [ ] `build/client/index.html` con hero y tarjetas completas.
+- [x] `build/client/index.html` con las tarjetas completas (falta el hero).
 - [ ] Probar los cuatro temas, en móvil y escritorio.
 - [ ] Sin CLS: imágenes con `width`/`height` y la del hero con prioridad.
 
@@ -137,7 +143,8 @@ Verificación:
 ### Sección 7: Manga (`/manga`, `/manga/:work/:volume/:chapter`)
 
 - [ ] Capa de contenido de manga (metadatos + lista de páginas con dimensiones), rutas y `prerender`.
-- [ ] Catálogo, obra/tomos y carcasa del lector con imágenes R2 (primeras páginas con prioridad, resto lazy).
+- [ ] Workers aparte solo con assets (`*.workers.dev`) para las páginas, fuera de cualquier repo.
+- [ ] Catálogo, obra/tomos y carcasa del lector (primeras páginas con prioridad, resto lazy).
 - [ ] Activar la fila "Mangas" de la home.
 
 ### Sección 8: Página 404
@@ -148,9 +155,12 @@ Verificación:
 
 ### Contenido e imágenes
 
-- [ ] Script EPUB → Markdown + extracción de imágenes a WebP con `content/images.json` (requiere el primer EPUB real).
-- [ ] Reemplazar el contenido de ejemplo por la primera novela real.
-- [ ] Crear bucket R2 y dominio propio de imágenes; configurar `CONTENT_IMAGES_URL`.
+- [x] Importador offline EPUB (`scripts/import-epub.py`) → Markdown + WebP + entradas de `content/images.json`, a un staging nuevo. Corrige notas mal enlazadas (`noteLinks`, `unusedNotes`) y notas partidas en varios párrafos.
+- [x] Contenido del paquete del 19/10/2026: novela ligera 1–31, novela web (arcos 3–9), precuelas y What if. Se borraron las importaciones anteriores.
+- [ ] Conseguir lo que falta: novela ligera 32 en adelante, novela web del arco 10, Re:Zero EX y Tanpenshuu (ver `content/PENDIENTES.md`).
+- [ ] Revisar en navegador los volúmenes con receta hecha a mano (What if Ayamatsu, Sasageru, Kasaneru y Rem; arco 4 de la novela web).
+- [x] Imágenes en WebP calidad 90 y miniaturas de portada para el inicio.
+- ~~Bucket R2 y dominio de imágenes~~: descartado. Las imágenes de novela se publican con el sitio en `/img/`; el manga irá a Workers solo de assets (ver `AGENTS.md`, sección 3).
 
 ### Performance
 
@@ -166,8 +176,10 @@ Verificación:
 
 ### Deployment
 
-- [ ] Cuenta, dominios y staging.
-- [ ] Automatizar publicación (conversión, subida a R2, build y deploy con GitHub Actions y acceso de lectura al repo de contenido).
+- [x] Cuenta de Cloudflare y subdominio `morguimateo1.workers.dev`. Sin dominio propio ni staging.
+- [x] GitHub Actions: checkout con submódulo (`CONTENT_REPO_TOKEN`), lint, typecheck, build y `wrangler deploy` en cada push a `main`.
+- [x] CI: `pnpm/action-setup@v6`, `actions/checkout@v7` y `actions/setup-node@v7` (Node 24), en `ubuntu-24.04` fijo.
+- [x] El sitio queda público en `workers.dev`, sin Cloudflare Access (decisión del usuario).
 - [ ] Producción, métricas y alertas.
 
 ## Verificación de la base
@@ -192,4 +204,6 @@ La migración base pasó lint, TypeScript y build. La comprobación HTTP en Wran
 
 ## Decisiones pendientes
 
-Fuente y licencia/disponibilidad del contenido, dominios del sitio e imágenes y estrategia de publicación. Ninguna está resuelta por la migración del framework.
+- Dominio propio: por ahora no; se usa `workers.dev`.
+- Menú móvil de la cabecera e imagen del hero.
+- Hosting de las páginas de manga (cuántos Workers de assets y cómo subirlas).
