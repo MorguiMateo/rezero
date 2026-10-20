@@ -17,7 +17,7 @@ Estado al 19 de octubre de 2026.
 - Publicado en https://biblioteca-de-pleyades.morguimateo1.workers.dev. Cada push a `main` pasa lint, typecheck y build en GitHub Actions y se despliega con `wrangler deploy` (`.github/workflows/deploy.yml`). Sin dominio propio ni backend.
 - Home con carruseles de obras, portadas (o portada genérica con los colores del tema) y etiqueta por obra; `/estilos` como guía de estilo.
 - Recorrido de novela prerenderizado: obra → volumen → capítulo con navegación anterior/siguiente (también entre volúmenes), leído desde el submódulo `content/`.
-- Contenido (todo de un único paquete de EPUB, ver `content/PENDIENTES.md`): novela ligera `re-zero` (tomos 1–31), novela web `re-zero-novela-web` (interludios del arco 3, arco 4, *One Day II* y volúmenes 16–43), `re-zero-precuelas` (6 novelas) y `re-zero-what-if` (7 historias). La novela ligera y la novela web son obras separadas y no se mezclan.
+- Contenido (de un paquete de EPUB más los tomos 44–46 y EX bajados de Recuerdos de Beako, ver `content/PENDIENTES.md`): novela ligera `re-zero` (tomos 1–31 y 44–46), `re-zero-ex` (tomos 1–6), novela web `re-zero-novela-web` (interludios del arco 3, arco 4, *One Day II* y volúmenes 16–43), `re-zero-precuelas` (6 novelas) y `re-zero-what-if` (7 historias). La novela ligera y la novela web son obras separadas y no se mezclan.
 - Importador offline: `scripts/import-epub.py` (EPUB → Markdown con pandoc). Escribe en un directorio de staging nuevo, nunca en `content/`.
 - Temas Satella, Emilia, Beatrice, Subaru, Echidna, Rem, Shaula y Ram con botón de personajes, tokens semánticos y fuentes Cormorant, Jost, Literata y JetBrains Mono empaquetadas con Fontsource.
 - Progreso de lectura solo en el navegador (`localStorage`, `src/lib/reading-progress.ts`): posición, capítulos leídos, «Continuar donde lo dejaste» y «Continuar leyendo». Modo lectura en el capítulo. Fuera de alcance: cuentas, sesión, sincronización, favoritos, historial y otras preferencias guardadas.
@@ -156,8 +156,8 @@ Verificación:
 ### Contenido e imágenes
 
 - [x] Importador offline EPUB (`scripts/import-epub.py`) → Markdown + WebP + entradas de `content/images.json`, a un staging nuevo. Corrige notas mal enlazadas (`noteLinks`, `unusedNotes`) y notas partidas en varios párrafos.
-- [x] Contenido del paquete del 19/10/2026: novela ligera 1–31, novela web (arcos 3–9), precuelas y What if. Se borraron las importaciones anteriores.
-- [ ] Conseguir lo que falta: novela ligera 32 en adelante, novela web del arco 10, Re:Zero EX y Tanpenshuu (ver `content/PENDIENTES.md`).
+- [x] Contenido del paquete del 19/10/2026: novela ligera 1–31 y 44–46, EX 1–6, novela web (arcos 3–9), precuelas y What if. Se borraron las importaciones anteriores.
+- [ ] Conseguir lo que falta: novela web del arco 10 y Tanpenshuu (la novela ligera 32–43 no tiene traducción) (ver `content/PENDIENTES.md`).
 - [ ] Revisar en navegador los volúmenes con receta hecha a mano (What if Ayamatsu, Sasageru, Kasaneru y Rem; arco 4 de la novela web).
 - [x] Imágenes en WebP calidad 90 y miniaturas de portada para el inicio.
 - ~~Bucket R2 y dominio de imágenes~~: descartado. Las imágenes de novela se publican con el sitio en `/img/`; el manga irá a Workers solo de assets (ver `AGENTS.md`, sección 3).
