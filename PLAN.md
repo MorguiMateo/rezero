@@ -15,14 +15,15 @@ Referencias: [prerender de React Router](https://reactrouter.com/how-to/pre-rend
 Estado al 19 de octubre de 2026.
 
 - Publicado en https://biblioteca-de-pleyades.morguimateo1.workers.dev. Cada push a `main` pasa lint, typecheck y build en GitHub Actions y se despliega con `wrangler deploy` (`.github/workflows/deploy.yml`). Sin dominio propio ni backend.
-- Home con carruseles de obras, portadas (o portada genérica con los colores del tema) y etiqueta por obra; `/estilos` como guía de estilo.
+- Home con las obras en una fila que se ajusta (sin carrusel ni flechas), portadas (o portada genérica con los colores del tema) y etiqueta por obra; `/estilos` como guía de estilo.
 - Recorrido de novela prerenderizado: obra → volumen → capítulo con navegación anterior/siguiente (también entre volúmenes), leído desde el submódulo `content/`.
 - Contenido (de un paquete de EPUB más los tomos 44–46 y EX bajados de Recuerdos de Beako, ver `content/PENDIENTES.md`): novela ligera `re-zero` (tomos 1–31 y 44–46), `re-zero-ex` (tomos 1–6), novela web `re-zero-novela-web` (interludios del arco 3, arco 4, *One Day II* y volúmenes 16–43), `re-zero-precuelas` (6 novelas) y `re-zero-what-if` (7 historias). La novela ligera y la novela web son obras separadas y no se mezclan.
 - Importador offline: `scripts/import-epub.py` (EPUB → Markdown con pandoc). Escribe en un directorio de staging nuevo, nunca en `content/`.
 - Temas Satella, Emilia, Beatrice, Subaru, Echidna, Rem, Shaula y Ram con botón de personajes, tokens semánticos y fuentes Cormorant, Jost, Literata y JetBrains Mono empaquetadas con Fontsource.
 - Progreso de lectura solo en el navegador (`localStorage`, `src/lib/reading-progress.ts`): posición, capítulos leídos, «Continuar donde lo dejaste» y «Continuar leyendo». Modo lectura en el capítulo. Fuera de alcance: cuentas, sesión, sincronización, favoritos, historial y otras preferencias guardadas.
 - Imágenes de novela servidas en `/img/` con el propio sitio (no R2), en WebP calidad 90 (los originales son JPG). Cada obra tiene una miniatura `portada-mini.webp` para el inicio.
-- Todavía no hay catálogo `/novela`, manga ni página 404 propia.
+- Manga: arcos 1–5, *Los lazos de hielo* y crossover con Konosuba, servidos desde el Worker `pleyades-manga`; se actualiza solo cada día.
+- Todavía no hay catálogo `/novela` ni página 404 propia.
 
 ## Requisitos técnicos
 
@@ -100,7 +101,7 @@ Referencia en ranoa.lat, de arriba abajo:
 3. **Panel "Mangas":** mismo panel con "Colección ilustrada" y portadas planas en lugar de libros. Se muestra cuando exista la sección de manga.
 4. Sin pie de página.
 
-El HTML prerenderizado debe incluir todas las tarjetas. El carrusel funciona con scroll nativo aunque no haya JavaScript; las flechas y los puntos son una mejora que se activa al hidratar.
+El HTML prerenderizado debe incluir todas las tarjetas. Con pocas obras no hay carrusel: las tarjetas se reparten en filas (dos por fila en móvil).
 
 Datos:
 
@@ -133,6 +134,7 @@ Verificación:
 
 ### Sección 5: Volumen (`/novela/:work/:volume`)
 
+- [x] La página de la obra muestra los volúmenes como tarjetas con su portada (`cover` en `volume.yaml`).
 - [ ] Portada del volumen, índice de capítulos y navegación entre volúmenes.
 
 ### Sección 6: Lector de capítulo (`/novela/:work/:volume/:chapter`)
@@ -142,10 +144,11 @@ Verificación:
 
 ### Sección 7: Manga (`/manga`, `/manga/:work/:volume/:chapter`)
 
-- [ ] Capa de contenido de manga (metadatos + lista de páginas con dimensiones), rutas y `prerender`.
-- [ ] Workers aparte solo con assets (`*.workers.dev`) para las páginas, fuera de cualquier repo.
-- [ ] Catálogo, obra/tomos y carcasa del lector (primeras páginas con prioridad, resto lazy).
-- [ ] Activar la fila "Mangas" de la home.
+- [x] Capa de contenido de manga (`manga.server.ts`, YAML con tamaños de página), rutas y `prerender`.
+- [x] Worker aparte solo con assets `pleyades-manga.morguimateo1.workers.dev` para las páginas, fuera de cualquier repo.
+- [x] Catálogo, obra/series y lector (primeras páginas con prioridad, resto lazy, atajos ← → Esc).
+- [x] Descarga y publicación diaria automática de capítulos nuevos (launchd, `../rezero-library/tools/manga-update.sh`).
+- [x] Activar la fila "Mangas" de la home.
 
 ### Sección 8: Página 404
 

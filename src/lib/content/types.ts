@@ -23,6 +23,8 @@ export type VolumeSummary = {
   slug: string;
   title: string;
   number: number;
+  // Small cover thumbnail for the volume cards; without one, a generic cover is drawn.
+  cover: ContentImage | null;
 };
 
 export type ChapterSummary = {
@@ -48,6 +50,35 @@ export type ChapterDetail = ChapterSummary & {
   work: Pick<WorkSummary, "slug" | "title">;
   volume: Pick<VolumeSummary, "slug" | "title">;
   html: string;
+  previous: ChapterLink | null;
+  next: ChapterLink | null;
+};
+
+// Manga: the pages live on a separate assets-only Worker (see AGENTS.md, section 3).
+
+export type MangaPage = {
+  src: string;
+  width: number;
+  height: number;
+};
+
+export type MangaWorkSummary = WorkSummary;
+
+export type MangaVolumeSummary = VolumeSummary & { chapterCount: number };
+
+export type MangaChapterSummary = ChapterSummary & { pageCount: number };
+
+export type MangaWorkDetail = MangaWorkSummary & { volumes: MangaVolumeSummary[] };
+
+export type MangaVolumeDetail = MangaVolumeSummary & {
+  work: Pick<WorkSummary, "slug" | "title">;
+  chapters: MangaChapterSummary[];
+};
+
+export type MangaChapterDetail = ChapterSummary & {
+  work: Pick<WorkSummary, "slug" | "title">;
+  volume: Pick<VolumeSummary, "slug" | "title">;
+  pages: MangaPage[];
   previous: ChapterLink | null;
   next: ChapterLink | null;
 };

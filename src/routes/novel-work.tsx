@@ -1,4 +1,5 @@
 import { data, Link } from "react-router";
+import { CoverGrid } from "@/components/cover-grid";
 import { ContinueReading } from "@/components/continue-reading";
 import literataFont from "@fontsource-variable/literata/files/literata-latin-wght-normal.woff2?url";
 import { fontPreload } from "@/lib/font-preload";
@@ -21,34 +22,38 @@ export function meta({ loaderData }: Route.MetaArgs) {
   return buildMeta({ title: work.title, description: work.description });
 }
 
+// The short label on the cover ("Volumen 20", "Arco 4"); the full title goes under the card.
+function volumeCaption(title: string) {
+  return title.split(/[·:(]/)[0].trim();
+}
+
 export default function NovelWork({ loaderData: { work } }: Route.ComponentProps) {
   return (
-    <div className="mx-auto w-full max-w-3xl flex-1 px-6 py-12">
-      <Link to="/" prefetch="intent" className="font-ui text-sm text-muted hover:text-primary">
-        ← Inicio
-      </Link>
-      <h1 className="mt-6 font-display text-4xl font-medium text-foreground sm:text-5xl">{work.title}</h1>
-      <p className="mt-2 font-ui text-sm uppercase tracking-[0.2em] text-muted">{work.author}</p>
-      <p className="mt-6 font-reading text-lg text-foreground">{work.description}</p>
-      {/* Height reserved so the button appearing after hydration does not push the list down. */}
-      <div className="mt-6 min-h-10">
-        <ContinueReading work={work.slug} />
+    <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
+      <div className="max-w-3xl">
+        <Link to="/" prefetch="intent" className="font-ui text-sm text-muted hover:text-primary">
+          ← Inicio
+        </Link>
+        <h1 className="mt-6 font-display text-4xl font-medium text-foreground sm:text-5xl">{work.title}</h1>
+        <p className="mt-2 font-ui text-sm uppercase tracking-[0.2em] text-muted">{work.author}</p>
+        <p className="mt-6 font-reading text-lg text-foreground">{work.description}</p>
+        {/* Height reserved so the button appearing after hydration does not push the cards down. */}
+        <div className="mt-6 min-h-10">
+          <ContinueReading work={work.slug} />
+        </div>
       </div>
 
       <h2 className="mt-12 font-display text-2xl text-primary">Volúmenes</h2>
-      <ol className="mt-4 divide-y divide-border border-y border-border">
-        {work.volumes.map((volume) => (
-          <li key={volume.slug}>
-            <Link
-              to={`/novela/${work.slug}/${volume.slug}`}
-              prefetch="intent"
-              className="block py-3 font-ui text-foreground hover:text-primary"
-            >
-              {volume.title}
-            </Link>
-          </li>
-        ))}
-      </ol>
+      <CoverGrid
+        label="Volúmenes"
+        items={work.volumes.map((volume) => ({
+          key: volume.slug,
+          to: `/novela/${work.slug}/${volume.slug}`,
+          title: volume.title,
+          caption: volumeCaption(volume.title),
+          image: volume.cover,
+        }))}
+      />
     </div>
   );
 }

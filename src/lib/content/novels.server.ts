@@ -2,6 +2,17 @@ import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { parse as parseYaml } from "yaml";
+import {
+  assertSlug,
+  contentRoot,
+  listDirectories,
+  optionalString,
+  readYamlFile,
+  requireNumber,
+  requireString,
+  sortByNumber,
+  type YamlRecord,
+} from "./files.server";
 import { resolveContentImage } from "./images.server";
 import { renderMarkdown } from "./markdown.server";
 import type {
@@ -16,60 +27,12 @@ import type {
 
 // Build-only access to the novels in the content submodule (see AGENTS.md, section 4).
 
-const contentRoot = path.resolve("content");
 const novelsRoot = path.join(contentRoot, "novela");
-const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const frontmatterPattern = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
 
 type ChapterEntry = ChapterSummary & { file: string };
 type VolumeEntry = VolumeSummary & { chapters: ChapterEntry[] };
 type WorkEntry = Omit<WorkSummary, "volumeCount"> & { volumes: VolumeEntry[] };
-
-type YamlRecord = Record<string, unknown>;
-
-function requireString(data: YamlRecord, key: string, file: string): string {
-  const value = data[key];
-  if (typeof value !== "string" || value.trim() === "") {
-    throw new Error(`${file}: "${key}" must be a non-empty string.`);
-  }
-  return value;
-}
-
-function optionalString(data: YamlRecord, key: string, file: string): string | null {
-  if (data[key] === undefined) return null;
-  return requireString(data, key, file);
-}
-
-function requireNumber(data: YamlRecord, key: string, file: string): number {
-  const value = data[key];
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`${file}: "${key}" must be a number.`);
-  }
-  return value;
-}
-
-function assertSlug(slug: string, location: string) {
-  if (!slugPattern.test(slug)) {
-    throw new Error(`${location}: "${slug}" is not a valid slug (lowercase letters, digits and hyphens).`);
-  }
-}
-
-// Sorts by number and rejects duplicates so URLs and reading order stay unambiguous.
-function sortByNumber<T extends { number: number; slug: string }>(items: T[], location: string): T[] {
-  const sorted = [...items].sort((a, b) => a.number - b.number);
-  sorted.forEach((item, index) => {
-    if (index > 0 && sorted[index - 1].number === item.number) {
-      throw new Error(`${location}: "${sorted[index - 1].slug}" and "${item.slug}" share number ${item.number}.`);
-    }
-  });
-  return sorted;
-}
-
-async function readYamlFile(file: string): Promise<YamlRecord> {
-  const data: unknown = parseYaml(await readFile(file, "utf8"));
-  if (!data || typeof data !== "object") throw new Error(`${file}: expected a YAML object.`);
-  return data as YamlRecord;
-}
 
 function splitFrontmatter(source: string, file: string): { data: YamlRecord; body: string } {
   const match = frontmatterPattern.exec(source);
@@ -77,11 +40,6 @@ function splitFrontmatter(source: string, file: string): { data: YamlRecord; bod
   const data: unknown = parseYaml(match[1]);
   if (!data || typeof data !== "object") throw new Error(`${file}: frontmatter must be a YAML object.`);
   return { data: data as YamlRecord, body: source.slice(match[0].length) };
-}
-
-async function listDirectories(directory: string): Promise<string[]> {
-  const entries = await readdir(directory, { withFileTypes: true });
-  return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
 }
 
 async function readChapters(volumeDirectory: string): Promise<ChapterEntry[]> {
@@ -105,10 +63,12 @@ async function readVolume(workDirectory: string, slug: string): Promise<VolumeEn
   assertSlug(slug, directory);
   const file = path.join(directory, "volume.yaml");
   const data = await readYamlFile(file);
+  const coverPath = optionalString(data, "cover", file);
   return {
     slug,
     title: requireString(data, "title", file),
     number: requireNumber(data, "number", file),
+    cover: coverPath ? await resolveContentImage(coverPath, file) : null,
     chapters: await readChapters(directory),
   };
 }
@@ -157,8 +117,8 @@ function toWorkSummary({ volumes, ...work }: WorkEntry): WorkSummary {
   return { ...work, volumeCount: volumes.length };
 }
 
-function toVolumeSummary({ slug, title, number }: VolumeEntry): VolumeSummary {
-  return { slug, title, number };
+function toVolumeSummary({ slug, title, number, cover }: VolumeEntry): VolumeSummary {
+  return { slug, title, number, cover };
 }
 
 function toChapterSummary({ slug, title, number }: ChapterEntry): ChapterSummary {

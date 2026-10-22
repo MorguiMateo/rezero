@@ -4,11 +4,12 @@ import { Link } from "react-router";
 import jetbrainsMonoFont from "@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url";
 import literataFont from "@fontsource-variable/literata/files/literata-latin-wght-normal.woff2?url";
 import { BookCover, coverTones } from "@/components/book-cover";
-import { Carousel } from "@/components/carousel";
 import { LatestReading } from "@/components/continue-reading";
 import { PleiadesMark } from "@/components/pleiades-mark";
 import { fontPreload } from "@/lib/font-preload";
+import { getMangaWorks } from "@/lib/content/manga.server";
 import { getWorks } from "@/lib/content/novels.server";
+import type { ContentImage } from "@/lib/content/types";
 import type { Route } from "./+types/home";
 
 export const meta: MetaFunction = () => [
@@ -21,7 +22,7 @@ export const meta: MetaFunction = () => [
 export const links: Route.LinksFunction = () => [fontPreload(literataFont), fontPreload(jetbrainsMonoFont)];
 
 export async function loader() {
-  return { works: await getWorks() };
+  return { works: await getWorks(), mangaWorks: await getMangaWorks() };
 }
 
 function OrnamentDivider() {
@@ -80,7 +81,48 @@ function FramedSection({
   );
 }
 
-export default function Home({ loaderData: { works } }: Route.ComponentProps) {
+type ShelfBook = {
+  slug: string;
+  href: string;
+  label: string | null;
+  title: string;
+  caption: string;
+  image: ContentImage | null;
+};
+
+// A row of books. With few works they wrap onto another row instead of scrolling sideways.
+function Shelf({ label, books }: { label: string; books: ShelfBook[] }) {
+  return (
+    <ul
+      aria-label={label}
+      className="grid grid-cols-2 justify-items-center gap-x-6 gap-y-8 px-6 pt-2 pb-6 sm:flex sm:flex-wrap sm:justify-center sm:gap-8"
+    >
+      {books.map((book, index) => (
+        <li key={book.slug} className="w-full max-w-40 sm:w-44 sm:max-w-none">
+          <p className="mb-3 h-4 text-center font-mono text-[0.65rem] tracking-[0.25em] text-muted uppercase">
+            {book.label}
+          </p>
+          <Link
+            to={book.href}
+            prefetch="intent"
+            className="block motion-safe:transition-transform motion-safe:duration-300 hover:scale-105 focus-visible:scale-105"
+          >
+            <BookCover
+              title={book.title}
+              caption={book.caption}
+              tone={coverTones[index % coverTones.length]}
+              image={book.image}
+              appearance="outlined"
+              eager
+            />
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export default function Home({ loaderData: { works, mangaWorks } }: Route.ComponentProps) {
   return (
     <div className="relative isolate flex flex-col gap-14 pb-20 sm:gap-20">
       {/* Night sky: two soft glows and a sparse field of stars. */}
@@ -110,37 +152,31 @@ export default function Home({ loaderData: { works } }: Route.ComponentProps) {
 
       <div className="flex flex-col gap-14 px-3 sm:gap-20 sm:px-6">
         <FramedSection eyebrow="Colección literaria" title="Novelas" href="/novela">
-          <Carousel label="Novelas">
-            {works.map((work, index) => (
-              <li key={work.slug} className="w-40 shrink-0 snap-center sm:w-44">
-                <p className="mb-3 h-4 text-center font-mono text-[0.65rem] tracking-[0.25em] text-muted uppercase">
-                  {work.label}
-                </p>
-                <Link
-                  to={`/novela/${work.slug}`}
-                  prefetch="intent"
-                  className="block motion-safe:transition-transform motion-safe:duration-300 hover:scale-105 focus-visible:scale-105"
-                >
-                  <BookCover
-                    title={work.title}
-                    caption={`${work.volumeCount} ${work.volumeCount === 1 ? "volumen" : "volúmenes"}`}
-                    tone={coverTones[index % coverTones.length]}
-                    image={work.cover}
-                    appearance="outlined"
-                    eager
-                  />
-                </Link>
-              </li>
-            ))}
-          </Carousel>
+          <Shelf
+            label="Novelas"
+            books={works.map((work) => ({
+              slug: work.slug,
+              href: `/novela/${work.slug}`,
+              label: work.label,
+              title: work.title,
+              caption: `${work.volumeCount} ${work.volumeCount === 1 ? "volumen" : "volúmenes"}`,
+              image: work.cover,
+            }))}
+          />
         </FramedSection>
 
         <FramedSection eyebrow="Colección ilustrada" title="Mangas" href="/manga">
-          <div className="flex flex-col items-center gap-3 px-6 pt-4 pb-10 text-center">
-            <PleiadesMark className="h-6 w-auto text-primary" />
-            <p className="font-display text-3xl text-foreground">Próximamente</p>
-            <p className="max-w-md font-reading text-muted">Los tomos del manga se están preparando para estos estantes.</p>
-          </div>
+          <Shelf
+            label="Mangas"
+            books={mangaWorks.map((work) => ({
+              slug: work.slug,
+              href: `/manga/${work.slug}`,
+              label: work.label,
+              title: work.title,
+              caption: `${work.volumeCount} ${work.volumeCount === 1 ? "serie" : "series"}`,
+              image: work.cover,
+            }))}
+          />
         </FramedSection>
       </div>
     </div>

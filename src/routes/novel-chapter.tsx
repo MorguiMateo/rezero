@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { data, Link, useNavigate } from "react-router";
+import { useRef } from "react";
+import { data, Link } from "react-router";
 import literataFont from "@fontsource-variable/literata/files/literata-latin-wght-normal.woff2?url";
 import { ReaderBar } from "@/components/reader-bar";
 import { ResumeToast } from "@/components/resume-toast";
@@ -8,6 +8,7 @@ import { getChapter } from "@/lib/content/novels.server";
 import type { ChapterDetail, ChapterLink } from "@/lib/content/types";
 import { buildMeta } from "@/lib/seo";
 import { useChapterTracking } from "@/lib/use-chapter-tracking";
+import { useReaderShortcuts } from "@/lib/use-reader-shortcuts";
 import type { Route } from "./+types/novel-chapter";
 
 export async function loader({ params }: Route.LoaderArgs) {
@@ -46,28 +47,6 @@ function ChapterNavLink({ workSlug, link, label }: { workSlug: string; link: Cha
       {label}: {link.title}
     </Link>
   );
-}
-
-function isEditable(target: EventTarget | null) {
-  return target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
-}
-
-// ← and → change chapter, Esc goes back to the volume index.
-function useReaderShortcuts(paths: { previous: string | null; next: string | null; index: string }) {
-  const navigate = useNavigate();
-  const { previous, next, index } = paths;
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-      if (isEditable(event.target)) return;
-      const target = { ArrowLeft: previous, ArrowRight: next, Escape: index }[event.key];
-      if (!target) return;
-      event.preventDefault();
-      navigate(target);
-    }
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [navigate, previous, next, index]);
 }
 
 function ChapterReader({ chapter }: { chapter: ChapterDetail }) {

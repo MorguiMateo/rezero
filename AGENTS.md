@@ -20,7 +20,7 @@ Este proyecto es un lector de novela ligera y manga. El contenido se pre-renderi
 - Contenido (capítulos, metadatos): las novelas se descargan una vez y se convierten a Markdown (ver sección 4). No se hace `fetch` a una fuente externa durante el build; `src/lib/content/` lee los archivos locales con APIs de Node. `content/` es el submódulo git del repositorio privado `MorguiMateo/rezero-content`: el repo de la app solo guarda el puntero al commit, nunca el texto de las novelas. Los cambios de contenido se commitean en el submódulo y luego se actualiza el puntero en este repo. El CI (`.github/workflows/deploy.yml`) clona el submódulo con un token de solo lectura (`CONTENT_REPO_TOKEN`), verifica y publica `main` con `wrangler deploy`.
 - Hosting gratuito: el sitio se publica en el subdominio `*.workers.dev` de Cloudflare; no hay dominio propio ni gastos.
 - Imágenes de novela (portadas e ilustraciones): descargar, convertir a `.webp` y guardarlas en `content/images/` (repo privado de contenido). El build las publica con el sitio bajo `/img/` como assets estáticos (mismo dominio, CDN de Cloudflare, peticiones gratis e ilimitadas).
-- Páginas de manga: demasiadas para el repo y para el límite de archivos del sitio (20.000 por versión en Workers Free). **PENDIENTE:** se servirán desde uno o más proyectos de Workers aparte, solo con assets estáticos, cada uno en su `*.workers.dev`; ver sección 3.
+- Páginas de manga: demasiadas para el repo y para el límite de archivos del sitio (20.000 por versión en Workers Free). Se sirven desde el Worker aparte `pleyades-manga` (solo assets estáticos, `https://pleyades-manga.morguimateo1.workers.dev`); si se llena, se agrega otro y la obra lo indica en su `images`. Ver secciones 3 y 4.
 - Caché de páginas: Static Assets, sin ISR. Nuevos capítulos: commitearlos en `content/`, actualizar el puntero del submódulo y hacer rebuild + deploy (automático con GitHub Actions al hacer push a `main`).
 - Empezar con Workers Free mientras alcance; revisar los límites vigentes de cantidad y tamaño de assets antes de añadir dependencias pesadas o muchas rutas.
 
@@ -55,9 +55,9 @@ Reglas:
   - `/novela/:work` (obra)
   - `/novela/:work/:volume` (volumen)
   - `/novela/:work/:volume/:chapter` (capítulo)
-  - `/manga/:work/:volume/:chapter` (obra, tomo, capítulo)
+  - `/manga/:work/:volume/:chapter` (obra, serie o tomo, capítulo; también `/manga/:work` y `/manga/:work/:volume`)
 - Los slugs son los nombres de carpeta y archivo de `content/` (minúsculas, dígitos y guiones), por ejemplo `/novela/re-zero/volumen-01/capitulo-01`.
-- Declarar rutas en `src/routes.ts`. Registrar **cada URL existente** en `prerender`: `react-router.config.ts` las enumera con `getNovelPaths()` de `src/lib/content/`. `prerender: true` solo enumera rutas sin parámetros.
+- Declarar rutas en `src/routes.ts`. Registrar **cada URL existente** en `prerender`: `react-router.config.ts` las enumera con `getNovelPaths()` y `getMangaPaths()` de `src/lib/content/`. `prerender: true` solo enumera rutas sin parámetros.
 - No usar query params para decidir qué contenido se carga en un loader de build. Reservarlos para filtros, orden o pestañas de UI con `useSearchParams` en el cliente.
 - Slugs inexistentes deben devolver HTTP 404. Mantener `assets.not_found_handling: "none"`; no configurar fallback SPA ni una redirección comodín a `index.html` o `__spa-fallback.html`.
 - Mantener `routeDiscovery: { mode: "initial" }` para no depender de un endpoint de manifiesto de rutas en runtime.
@@ -69,7 +69,7 @@ Reglas:
 - Imágenes de contenido ya optimizadas, en `.webp` y tamaños necesarios.
 - Páginas de manga con `width`, `height`, `loading="lazy"` y `decoding="async"`; primeras 1–2 páginas con prioridad (`fetchPriority="high"`, sin lazy loading).
 - Novela: `content/images/` se sirve en `/img/` (en dev con un middleware de `vite.config.ts`; en el build se copia a `build/client/img/`). `public/_headers` les da caché de un día porque su URL no cambia al reemplazarlas.
-- Manga: las páginas no van en ningún repositorio. Se suben con `wrangler deploy` a proyectos de Workers solo de assets (sin script), fuera de este sitio. No usar `*.r2.dev` ni enlazar imágenes de sitios ajenos (hotlinking).
+- Manga: las páginas no van en ningún repositorio. Se suben con `wrangler deploy` a proyectos de Workers solo de assets (sin script), fuera de este sitio: `../rezero-library/manga-site/` (WebP calidad 80, como mucho 1400 px de ancho, caché de 7 días). No usar `*.r2.dev` ni enlazar imágenes de sitios ajenos (hotlinking).
 - No guardar imágenes de contenido en `public/` ni en el repositorio de la app. `public/` solo contiene `favicon.svg`, `_headers` y otros assets de interfaz; los retratos del botón de tema están en `src/assets/characters/*.webp` y se incrustan en el CSS (variable `--theme-portrait` de cada tema, utilidad `theme-portrait`) para que aparezcan en el primer pintado; el logo es SVG en línea en `src/components/`; las fuentes se empaquetan desde Fontsource.
 
 ## 4. Contenido fuera del bundle
@@ -83,7 +83,16 @@ Reglas:
   content/novela/<obra>/<volumen>/<capitulo>.md
   ```
 
-- `work.yaml` admite dos campos opcionales: `label` (etiqueta sobre el libro en el inicio: «Principal», «Precuela»…) y `cover` (ruta de la portada dentro de `content/images/`, con la misma validación que las ilustraciones). Sin `cover`, el inicio dibuja una portada genérica con los colores del tema.
+- `work.yaml` admite dos campos opcionales: `label` (etiqueta sobre el libro en el inicio: «Principal», «Precuela»…) y `cover` (ruta de la portada dentro de `content/images/`, con la misma validación que las ilustraciones). Sin `cover`, el inicio dibuja una portada genérica con los colores del tema. `volume.yaml` admite también `cover` (miniatura `portada-mini.webp` del volumen) para las tarjetas de volúmenes de la página de la obra.
+- Manga: el repo de contenido solo guarda metadatos y tamaños de página; acceso único mediante `src/lib/content/manga.server.ts` (`getMangaWorks()`, `getMangaWork()`, `getMangaVolume()`, `getMangaChapter()`, `getMangaPaths()`):
+
+  ```
+  content/manga/<obra>/work.yaml              title, author, description, label?, cover?, images (origen https del Worker)
+  content/manga/<obra>/<serie>/volume.yaml    title, number, cover?
+  content/manga/<obra>/<serie>/<capitulo>.yaml  title, number, pages: [[ancho, alto], ...]
+  ```
+
+  La página N está en `<images>/<obra>/<serie>/<capitulo>/<NNN>.webp`. La descarga y conversión (`../rezero-library/tools/manga-download.sh` y `manga-build.py`) son incrementales y quedan fuera de los repos.
 - Las novelas descargadas (normalmente EPUB, que por dentro es XHTML + imágenes) se convierten una sola vez a este formato, por ejemplo con `pandoc`, limpiando clases y estilos del editor. El build no parsea EPUB.
 - Convenciones Markdown: cursiva para énfasis y pensamientos, `***` para cambios de escena, `[^n]` para notas del traductor, `![alt](ruta)` para ilustraciones. No usar MDX ni HTML crudo dentro del Markdown.
 - Las ilustraciones viven en `content/images/` como WebP. El Markdown guarda una ruta relativa a esa carpeta (`re-zero/v01/ilust-03.webp`) y `content/images.json` mapea cada ruta a `{ "width", "height" }`. El build antepone `/img/` y añade `width`, `height`, `loading="lazy"` y `decoding="async"`. Falla si el archivo no existe, si no está en el manifiesto o si la imagen es una URL externa.
