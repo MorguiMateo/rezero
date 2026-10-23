@@ -1,8 +1,11 @@
+import { useRef } from "react";
+import { preconnect } from "react-dom";
 import { data, Link } from "react-router";
 import { ReaderBar } from "@/components/reader-bar";
 import { getMangaChapter } from "@/lib/content/manga.server";
 import type { ChapterLink } from "@/lib/content/types";
 import { buildMeta } from "@/lib/seo";
+import { mangaPriorityPages, useMangaPagePreload } from "@/lib/use-manga-preload";
 import { useReaderShortcuts } from "@/lib/use-reader-shortcuts";
 import type { Route } from "./+types/manga-chapter";
 
@@ -24,9 +27,6 @@ export function meta({ loaderData }: Route.MetaArgs) {
 // Chapters open in reading mode: the root layout drops the site header (see root.tsx).
 export const handle = { readingMode: true };
 
-// The first pages are above the fold; they load right away instead of lazily.
-const priorityPages = 2;
-
 function chapterPath(workSlug: string, link: ChapterLink) {
   return `/manga/${workSlug}/${link.volumeSlug}/${link.chapterSlug}`;
 }
@@ -47,6 +47,16 @@ function ChapterNavLink({ workSlug, link, label }: { workSlug: string; link: Cha
 export default function MangaChapter({ loaderData: { chapter } }: Route.ComponentProps) {
   const { work, volume } = chapter;
   const volumePath = `/manga/${work.slug}/${volume.slug}`;
+  const pagesRef = useRef<HTMLDivElement>(null);
+  const endRef = useRef<HTMLElement>(null);
+  // Rendered into <head> during the build: the connection opens before the first <img> is parsed.
+  preconnect(chapter.imagesOrigin);
+  useMangaPagePreload({
+    chapterKey: `${volume.slug}/${chapter.slug}`,
+    pagesRef,
+    endRef,
+    nextChapterPages: chapter.nextPages,
+  });
   useReaderShortcuts({
     previous: chapter.previous && chapterPath(work.slug, chapter.previous),
     next: chapter.next && chapterPath(work.slug, chapter.next),
@@ -63,7 +73,7 @@ export default function MangaChapter({ loaderData: { chapter } }: Route.Componen
           </p>
           <h1 className="mt-3 font-display text-4xl font-medium text-foreground">{chapter.title}</h1>
         </div>
-        <div className="mt-8 flex flex-col">
+        <div ref={pagesRef} className="mt-8 flex flex-col">
           {chapter.pages.map((page, index) => (
             <img
               key={page.src}
@@ -71,14 +81,14 @@ export default function MangaChapter({ loaderData: { chapter } }: Route.Componen
               width={page.width}
               height={page.height}
               alt={`Página ${index + 1}`}
-              loading={index < priorityPages ? "eager" : "lazy"}
-              fetchPriority={index < priorityPages ? "high" : "auto"}
+              loading={index < mangaPriorityPages ? "eager" : "lazy"}
+              fetchPriority={index < mangaPriorityPages ? "high" : "auto"}
               decoding="async"
               className="h-auto w-full bg-surface"
             />
           ))}
         </div>
-        <nav aria-label="Navegación entre capítulos" className="mt-12 flex justify-between gap-4 border-t border-border px-6 pt-6">
+        <nav ref={endRef} aria-label="Navegación entre capítulos" className="mt-12 flex justify-between gap-4 border-t border-border px-6 pt-6">
           <ChapterNavLink workSlug={work.slug} link={chapter.previous} label="Anterior" />
           <ChapterNavLink workSlug={work.slug} link={chapter.next} label="Siguiente" />
         </nav>

@@ -11,6 +11,7 @@ import {
   requireString,
   sortByNumber,
 } from "./files.server";
+import { mangaPriorityPages } from "../use-manga-preload";
 import { resolveContentImage } from "./images.server";
 import type {
   ChapterLink,
@@ -37,6 +38,10 @@ const mangaRoot = path.join(contentRoot, "manga");
 type ChapterEntry = MangaChapterSummary & { pages: [number, number][] };
 type VolumeEntry = Omit<MangaVolumeSummary, "chapterCount"> & { chapters: ChapterEntry[] };
 type WorkEntry = Omit<MangaWorkSummary, "volumeCount"> & { images: string; volumes: VolumeEntry[] };
+
+function pageSrc(work: WorkEntry, volume: VolumeEntry, chapter: ChapterEntry, index: number) {
+  return `${work.images}/${work.slug}/${volume.slug}/${chapter.slug}/${String(index + 1).padStart(3, "0")}.webp`;
+}
 
 function requirePages(data: Record<string, unknown>, file: string): [number, number][] {
   const pages = data.pages;
@@ -179,21 +184,26 @@ export async function getMangaChapter(
     const entry = readingOrder[position];
     return entry ? { volumeSlug: entry.volume.slug, chapterSlug: entry.chapter.slug, title: entry.chapter.title } : null;
   };
-  const folder = `${work.images}/${work.slug}/${volume.slug}/${chapter.slug}`;
   const pages: MangaPage[] = chapter.pages.map(([width, height], page) => ({
-    src: `${folder}/${String(page + 1).padStart(3, "0")}.webp`,
+    src: pageSrc(work, volume, chapter, page),
     width,
     height,
   }));
+  const next = readingOrder[index + 1];
+  const nextPages = next
+    ? next.chapter.pages.slice(0, mangaPriorityPages).map((_, page) => pageSrc(work, next.volume, next.chapter, page))
+    : [];
   return {
     slug: chapter.slug,
     title: chapter.title,
     number: chapter.number,
     work: { slug: work.slug, title: work.title },
     volume: { slug: volume.slug, title: volume.title },
+    imagesOrigin: work.images,
     pages,
     previous: toLink(index - 1),
     next: toLink(index + 1),
+    nextPages,
   };
 }
 

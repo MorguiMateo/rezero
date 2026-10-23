@@ -78,7 +78,11 @@ export type MangaVolumeDetail = MangaVolumeSummary & {
 export type MangaChapterDetail = ChapterSummary & {
   work: Pick<WorkSummary, "slug" | "title">;
   volume: Pick<VolumeSummary, "slug" | "title">;
+  // Origin of the Worker serving the pages, for the preconnect hint.
+  imagesOrigin: string;
   pages: MangaPage[];
   previous: ChapterLink | null;
   next: ChapterLink | null;
+  // First pages of the next chapter, preloaded near the end of this one.
+  nextPages: string[];
 };
