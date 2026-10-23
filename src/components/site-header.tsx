@@ -1,11 +1,16 @@
 import { NavLink } from "react-router";
+import { contentSectionsEnabled } from "@/lib/sections";
 import { SiteLogo } from "./site-logo";
 import { ThemeButton } from "./theme-button";
 
 const navigation = [
   { to: "/", label: "Inicio", end: true },
-  { to: "/novela", label: "Novela", end: false },
-  { to: "/manga", label: "Manga", end: false },
+  ...(contentSectionsEnabled
+    ? [
+        { to: "/novela", label: "Novela", end: false },
+        { to: "/manga", label: "Manga", end: false },
+      ]
+    : []),
 ];
 
 export function SiteHeader() {

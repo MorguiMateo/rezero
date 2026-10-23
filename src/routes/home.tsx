@@ -7,6 +7,7 @@ import { BookCover, coverTones } from "@/components/book-cover";
 import { LatestReading } from "@/components/continue-reading";
 import { PleiadesMark } from "@/components/pleiades-mark";
 import { fontPreload } from "@/lib/font-preload";
+import { contentSectionsEnabled } from "@/lib/sections";
 import { getMangaWorks } from "@/lib/content/manga.server";
 import { getWorks } from "@/lib/content/novels.server";
 import type { ContentImage } from "@/lib/content/types";
@@ -22,6 +23,7 @@ export const meta: MetaFunction = () => [
 export const links: Route.LinksFunction = () => [fontPreload(literataFont), fontPreload(jetbrainsMonoFont)];
 
 export async function loader() {
+  if (!contentSectionsEnabled) return { works: [], mangaWorks: [] };
   return { works: await getWorks(), mangaWorks: await getMangaWorks() };
 }
 
@@ -145,40 +147,44 @@ export default function Home({ loaderData: { works, mangaWorks } }: Route.Compon
           La novela ligera y el manga de Re:Zero, ordenados como en los estantes de una biblioteca.
         </p>
         {/* Height reserved so the link appearing after hydration does not push the shelves down. */}
-        <div className="flex min-h-10 w-full max-w-xl justify-center">
-          <LatestReading works={works} />
-        </div>
+        {contentSectionsEnabled && (
+          <div className="flex min-h-10 w-full max-w-xl justify-center">
+            <LatestReading works={works} />
+          </div>
+        )}
       </section>
 
-      <div className="flex flex-col gap-14 px-3 sm:gap-20 sm:px-6">
-        <FramedSection eyebrow="Colección literaria" title="Novelas" href="/novela">
-          <Shelf
-            label="Novelas"
-            books={works.map((work) => ({
-              slug: work.slug,
-              href: `/novela/${work.slug}`,
-              label: work.label,
-              title: work.title,
-              caption: `${work.volumeCount} ${work.volumeCount === 1 ? "volumen" : "volúmenes"}`,
-              image: work.cover,
-            }))}
-          />
-        </FramedSection>
+      {contentSectionsEnabled && (
+        <div className="flex flex-col gap-14 px-3 sm:gap-20 sm:px-6">
+          <FramedSection eyebrow="Colección literaria" title="Novelas" href="/novela">
+            <Shelf
+              label="Novelas"
+              books={works.map((work) => ({
+                slug: work.slug,
+                href: `/novela/${work.slug}`,
+                label: work.label,
+                title: work.title,
+                caption: `${work.volumeCount} ${work.volumeCount === 1 ? "volumen" : "volúmenes"}`,
+                image: work.cover,
+              }))}
+            />
+          </FramedSection>
 
-        <FramedSection eyebrow="Colección ilustrada" title="Mangas" href="/manga">
-          <Shelf
-            label="Mangas"
-            books={mangaWorks.map((work) => ({
-              slug: work.slug,
-              href: `/manga/${work.slug}`,
-              label: work.label,
-              title: work.title,
-              caption: `${work.volumeCount} ${work.volumeCount === 1 ? "serie" : "series"}`,
-              image: work.cover,
-            }))}
-          />
-        </FramedSection>
-      </div>
+          <FramedSection eyebrow="Colección ilustrada" title="Mangas" href="/manga">
+            <Shelf
+              label="Mangas"
+              books={mangaWorks.map((work) => ({
+                slug: work.slug,
+                href: `/manga/${work.slug}`,
+                label: work.label,
+                title: work.title,
+                caption: `${work.volumeCount} ${work.volumeCount === 1 ? "serie" : "series"}`,
+                image: work.cover,
+              }))}
+            />
+          </FramedSection>
+        </div>
+      )}
     </div>
   );
 }
