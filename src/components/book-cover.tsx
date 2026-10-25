@@ -44,7 +44,6 @@ function GenericCover({ title, tone, placeholder }: { title: string; tone: Cover
   );
 }
 
-// A hardcover book: the work's cover (or a generic one), spine shadow and page edges.
 export function BookCover({
   title,
   caption,

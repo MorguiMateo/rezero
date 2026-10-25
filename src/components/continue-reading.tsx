@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Button, ButtonLink } from "@/components/button";
 import { type LastRead, type ReadingProgress, clearWorkProgress, minShownPercent, useReadingProgress } from "@/lib/reading-progress";
 
 function lastReadPath(work: string, last: LastRead) {
@@ -25,21 +25,20 @@ export function ContinueReading({ work }: { work: string }) {
   if (!last) return null;
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-      <Link
+      <ButtonLink
         to={lastReadPath(work, last)}
         prefetch="intent"
-        className="rounded-md bg-button px-5 py-2.5 font-ui text-sm text-button-foreground transition-colors hover:bg-button-hover"
       >
         Continuar: {last.title}
         {progressLabel(last)}
-      </Link>
-      <button
-        type="button"
+      </ButtonLink>
+      <Button
+        variant="text"
+        size="label"
         onClick={() => clearWorkProgress(work)}
-        className="cursor-pointer font-ui text-xs text-muted underline-offset-4 hover:text-primary hover:underline"
       >
         Olvidar progreso
-      </button>
+      </Button>
     </div>
   );
 }
@@ -50,10 +49,12 @@ export function LatestReading({ works }: { works: { slug: string; title: string 
   if (!latest) return null;
   const workTitle = works.find((work) => work.slug === latest.work)?.title;
   return (
-    <Link
+    <ButtonLink
       to={lastReadPath(latest.work, latest.last)}
       prefetch="intent"
-      className="group flex max-w-full items-center gap-3 rounded-full border border-border bg-surface/80 py-2 pr-5 pl-4 font-ui text-sm text-foreground backdrop-blur-sm transition-colors hover:border-primary"
+      variant="outline"
+      size="sm"
+      shape="pill"
     >
       <span aria-hidden="true" className="text-primary">
         ✦
@@ -66,6 +67,6 @@ export function LatestReading({ works }: { works: { slug: string; title: string 
           {progressLabel(latest.last)}
         </span>
       </span>
-    </Link>
+    </ButtonLink>
   );
 }

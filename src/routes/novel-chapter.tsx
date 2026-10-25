@@ -1,6 +1,7 @@
 import { useRef } from "react";
-import { data, Link } from "react-router";
+import { data } from "react-router";
 import literataFont from "@fontsource-variable/literata/files/literata-latin-wght-normal.woff2?url";
+import { ChapterNavigation } from "@/components/chapter-navigation";
 import { ReaderBar } from "@/components/reader-bar";
 import { ResumeToast } from "@/components/resume-toast";
 import { fontPreload } from "@/lib/font-preload";
@@ -36,19 +37,6 @@ function chapterPath(workSlug: string, link: ChapterLink) {
   return `/novela/${workSlug}/${link.volumeSlug}/${link.chapterSlug}`;
 }
 
-function ChapterNavLink({ workSlug, link, label }: { workSlug: string; link: ChapterLink | null; label: string }) {
-  if (!link) return <span />;
-  return (
-    <Link
-      to={chapterPath(workSlug, link)}
-      prefetch="intent"
-      className="font-ui text-sm text-primary hover:underline underline-offset-4"
-    >
-      {label}: {link.title}
-    </Link>
-  );
-}
-
 function ChapterReader({ chapter }: { chapter: ChapterDetail }) {
   const { work, volume } = chapter;
   const volumePath = `/novela/${work.slug}/${volume.slug}`;
@@ -74,13 +62,10 @@ function ChapterReader({ chapter }: { chapter: ChapterDetail }) {
         <h1 className="mt-3 font-display text-4xl font-medium text-foreground">{chapter.title}</h1>
         {/* HTML generated at build time from our own Markdown; raw HTML in the source is dropped. */}
         <article ref={articleRef} className="chapter-prose mt-8" dangerouslySetInnerHTML={{ __html: chapter.html }} />
-        <nav
-          aria-label="Navegación entre capítulos"
-          className="mt-12 flex justify-between gap-4 border-t border-border pt-6"
-        >
-          <ChapterNavLink workSlug={work.slug} link={chapter.previous} label="Anterior" />
-          <ChapterNavLink workSlug={work.slug} link={chapter.next} label="Siguiente" />
-        </nav>
+        <ChapterNavigation
+          previous={chapter.previous && { to: chapterPath(work.slug, chapter.previous), title: chapter.previous.title }}
+          next={chapter.next && { to: chapterPath(work.slug, chapter.next), title: chapter.next.title }}
+        />
       </div>
       {resume && <ResumeToast percent={resume.percent} onResume={resumeReading} onDismiss={dismissResume} />}
     </div>

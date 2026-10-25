@@ -17,13 +17,11 @@ export const links: Route.LinksFunction = () => [
   { rel: "stylesheet", href: fontsStylesheet },
 ];
 
-// Routes that export handle = { readingMode: true } get their own reader bar instead of the site header.
-function useReadingMode() {
-  return useMatches().some((match) => (match.handle as { readingMode?: boolean } | undefined)?.readingMode);
-}
-
 export function Layout({ children }: { children: ReactNode }) {
-  const readingMode = useReadingMode();
+  const matches = useMatches();
+  // Reading routes supply their own bar; the static 404 document must not initialize the router.
+  const readingMode = matches.some((match) => (match.handle as { readingMode?: boolean } | undefined)?.readingMode);
+  const staticNotFound = matches.some((match) => (match.handle as { staticNotFound?: boolean } | undefined)?.staticNotFound);
   return (
     // The <head> script may change data-theme before hydration; that is expected.
     <html lang="es" data-theme={defaultTheme} className="h-full antialiased" suppressHydrationWarning>
@@ -37,12 +35,12 @@ export function Layout({ children }: { children: ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" data-static-not-found={staticNotFound ? "" : undefined}>
         {!readingMode && <SiteHeader />}
         <main id="contenido-principal" className="flex flex-1 flex-col">
           {children}
         </main>
-        <ScrollRestoration />
+        {!staticNotFound && <ScrollRestoration />}
         <Scripts />
       </body>
     </html>

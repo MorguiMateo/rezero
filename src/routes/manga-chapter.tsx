@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { preconnect } from "react-dom";
-import { data, Link } from "react-router";
+import { data } from "react-router";
+import { ChapterNavigation } from "@/components/chapter-navigation";
 import { ReaderBar } from "@/components/reader-bar";
 import { getMangaChapter } from "@/lib/content/manga.server";
 import type { ChapterLink } from "@/lib/content/types";
@@ -29,19 +30,6 @@ export const handle = { readingMode: true };
 
 function chapterPath(workSlug: string, link: ChapterLink) {
   return `/manga/${workSlug}/${link.volumeSlug}/${link.chapterSlug}`;
-}
-
-function ChapterNavLink({ workSlug, link, label }: { workSlug: string; link: ChapterLink | null; label: string }) {
-  if (!link) return <span />;
-  return (
-    <Link
-      to={chapterPath(workSlug, link)}
-      prefetch="intent"
-      className="font-ui text-sm text-primary hover:underline underline-offset-4"
-    >
-      {label}: {link.title}
-    </Link>
-  );
 }
 
 export default function MangaChapter({ loaderData: { chapter } }: Route.ComponentProps) {
@@ -88,10 +76,12 @@ export default function MangaChapter({ loaderData: { chapter } }: Route.Componen
             />
           ))}
         </div>
-        <nav ref={endRef} aria-label="Navegación entre capítulos" className="mt-12 flex justify-between gap-4 border-t border-border px-6 pt-6">
-          <ChapterNavLink workSlug={work.slug} link={chapter.previous} label="Anterior" />
-          <ChapterNavLink workSlug={work.slug} link={chapter.next} label="Siguiente" />
-        </nav>
+        <ChapterNavigation
+          ref={endRef}
+          className="px-6"
+          previous={chapter.previous && { to: chapterPath(work.slug, chapter.previous), title: chapter.previous.title }}
+          next={chapter.next && { to: chapterPath(work.slug, chapter.next), title: chapter.next.title }}
+        />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { type RefObject, useEffect } from "react";
+import { mangaPriorityPages } from "./manga-loading";
 
-// The first pages are above the fold: they render eager and with high priority.
-export const mangaPriorityPages = 2;
+export { mangaPriorityPages } from "./manga-loading";
 // Pages downloaded at the same time by the background preload.
 const concurrentPages = 3;
 // Start fetching the next chapter's first pages when the chapter end is this close.

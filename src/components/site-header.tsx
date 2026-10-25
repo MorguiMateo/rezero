@@ -40,7 +40,6 @@ export function SiteHeader() {
                     }`
                   }
                 >
-                  {/* The active link carries a small star above it, as in the reference site. */}
                   <span
                     aria-hidden="true"
                     className="absolute -top-3.5 left-1/2 hidden -translate-x-1/2 text-[0.6rem] text-header-accent group-aria-[current=page]:block"

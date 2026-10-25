@@ -17,15 +17,15 @@ export function CoverGrid({ items, label }: { items: CoverGridItem[]; label: str
     <ol aria-label={label} className="mt-6 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {items.map((item, index) => (
         <li key={item.key}>
-          <Link to={item.to} prefetch="intent" className="group block focus-visible:outline-none">
-            <div className="motion-safe:transition-transform motion-safe:duration-300 group-hover:scale-105 group-focus-visible:scale-105">
+          <Link to={item.to} prefetch="intent" className="group block">
+            <div className="motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:scale-105 motion-safe:group-focus-visible:scale-105">
               <BookCover
                 title={item.title}
                 caption={item.caption}
                 tone={coverTones[index % coverTones.length]}
                 image={item.image}
                 appearance="outlined"
-                // The first row is visible on load; the rest load as the reader scrolls.
+                // Prioritize enough covers for the widest (five-column) first row.
                 eager={index < 5}
               />
             </div>

@@ -25,7 +25,6 @@
     "react-router.config.ts",
     "vite.config.ts"
   ],
-  // Hidden sections have no registered routes, so react-router typegen emits no ./+types for them.
-  // Remove the two route globs when contentSectionsEnabled (src/lib/sections.ts) is turned on.
-  "exclude": ["node_modules", "src/routes/novel-*.tsx", "src/routes/manga-*.tsx"]
+  // Hidden catalogs have no registered routes or generated ./+types.
+  "exclude": ["node_modules", "src/routes/novel-catalog.tsx", "src/routes/manga-catalog.tsx"]
 }

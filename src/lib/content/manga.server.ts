@@ -11,7 +11,7 @@ import {
   requireString,
   sortByNumber,
 } from "./files.server";
-import { mangaPriorityPages } from "../use-manga-preload";
+import { mangaPriorityPages } from "../manga-loading";
 import { resolveContentImage } from "./images.server";
 import type {
   ChapterLink,
@@ -41,6 +41,31 @@ type WorkEntry = Omit<MangaWorkSummary, "volumeCount"> & { images: string; volum
 
 function pageSrc(work: WorkEntry, volume: VolumeEntry, chapter: ChapterEntry, index: number) {
   return `${work.images}/${work.slug}/${volume.slug}/${chapter.slug}/${String(index + 1).padStart(3, "0")}.webp`;
+}
+
+function requireImagesOrigin(data: Record<string, unknown>, file: string): string {
+  const images = requireString(data, "images", file);
+  const message = `${file}: "images" must be an https origin without credentials, a path, query or fragment.`;
+  let url: URL;
+  try {
+    url = new URL(images);
+  } catch {
+    throw new Error(message);
+  }
+  if (
+    url.protocol !== "https:" ||
+    url.username ||
+    url.password ||
+    url.pathname !== "/" ||
+    url.search ||
+    url.hash ||
+    // Reject delimiters and normalized paths that URL would otherwise silently discard.
+    !/^https:\/\/[^/\\\s?#@]+\/?$/i.test(images)
+  ) {
+    throw new Error(message);
+  }
+  // Normalize an optional trailing slash so page paths always join with one separator.
+  return url.origin;
 }
 
 function requirePages(data: Record<string, unknown>, file: string): [number, number][] {
@@ -100,8 +125,7 @@ async function readWork(slug: string): Promise<WorkEntry> {
   assertSlug(slug, directory);
   const file = path.join(directory, "work.yaml");
   const data = await readYamlFile(file);
-  const images = requireString(data, "images", file);
-  if (!/^https:\/\/[^/]+$/.test(images)) throw new Error(`${file}: "images" must be an https origin without a path.`);
+  const images = requireImagesOrigin(data, file);
   const volumes = await Promise.all(
     (await listDirectories(directory)).map((volumeSlug) => readVolume(directory, volumeSlug)),
   );

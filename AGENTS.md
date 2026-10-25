@@ -59,7 +59,7 @@ Reglas:
 - Los slugs son los nombres de carpeta y archivo de `content/` (minúsculas, dígitos y guiones), por ejemplo `/novela/re-zero/volumen-01/capitulo-01`.
 - Declarar rutas en `src/routes.ts`. Registrar **cada URL existente** en `prerender`: `react-router.config.ts` las enumera con `getNovelPaths()` y `getMangaPaths()` de `src/lib/content/`. `prerender: true` solo enumera rutas sin parámetros.
 - No usar query params para decidir qué contenido se carga en un loader de build. Reservarlos para filtros, orden o pestañas de UI con `useSearchParams` en el cliente.
-- Slugs inexistentes deben devolver HTTP 404. Mantener `assets.not_found_handling: "none"`; no configurar fallback SPA ni una redirección comodín a `index.html` o `__spa-fallback.html`.
+- Slugs inexistentes deben devolver HTTP 404 con la página propia prerenderizada en `build/client/404.html`. Mantener `assets.not_found_handling: "404-page"`; no configurar fallback SPA ni una redirección comodín a `index.html` o `__spa-fallback.html`.
 - Mantener `routeDiscovery: { mode: "initial" }` para no depender de un endpoint de manifiesto de rutas en runtime.
 - Cada ruta de contenido define `meta` (título, descripción, canonical y Open Graph) a partir de los mismos datos del loader. El dominio canonical aún debe decidirse.
 

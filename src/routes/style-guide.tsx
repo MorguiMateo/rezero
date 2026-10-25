@@ -1,5 +1,9 @@
+import { useState } from "react";
 import type { MetaFunction } from "react-router";
 import { BookCover, type CoverAppearance } from "@/components/book-cover";
+import { Button, ButtonLink } from "@/components/button";
+import { CoverGrid } from "@/components/cover-grid";
+import { SiteLogo } from "@/components/site-logo";
 import { getWorks } from "@/lib/content/novels.server";
 import type { WorkSummary } from "@/lib/content/types";
 import { themeNames, themes, type Theme } from "@/lib/theme";
@@ -265,66 +269,69 @@ function SwatchGrid({ swatches }: { swatches: Swatch[] }) {
   );
 }
 
-// Renders the same mock page inside a data-theme wrapper to compare themes.
-function ThemePreview({ palette }: { palette: CharacterPalette }) {
+// Production components share the theme wrapper; demo actions never touch saved progress.
+function ThemePreview({ palette, sampleWork }: { palette: CharacterPalette; sampleWork: SampleWork | null }) {
+  const [notice, setNotice] = useState("");
+  const title = sampleWork?.title ?? "Biblioteca de Pléyades";
+
   return (
     <div
       data-theme={palette.id}
       className="overflow-hidden rounded-xl border border-border bg-background text-foreground"
     >
-      <div className="flex items-center justify-between bg-header px-8 py-4 text-header-foreground">
-        <span className="font-display text-2xl">
-          Re<span className="text-header-accent">:</span>Zero
-        </span>
-        <nav className="flex gap-6 font-ui text-xs uppercase tracking-[0.25em]">
-          <span className="border-b-2 border-header-accent pb-1 text-primary-soft">Inicio</span>
-          <span className="opacity-70">Novela</span>
-          <span className="opacity-70">Manga</span>
-        </nav>
-        <span className="rounded-md border border-primary-soft/60 px-4 py-1.5 font-ui text-xs uppercase tracking-[0.2em] text-primary-soft">
-          Entrar
-        </span>
+      <div className="bg-header px-6 py-4 text-header-foreground sm:px-8">
+        <SiteLogo />
       </div>
       <div className="h-1.5 bg-primary-fill" />
 
-      <div className="p-8">
+      <div className="p-6 sm:p-8">
         <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-accent">
           Vista previa · tema {palette.id}
         </p>
         <h4 className="mt-2 font-display text-4xl font-medium">Biblioteca de Pléyades</h4>
         <p className="mt-4 max-w-2xl font-reading text-lg leading-relaxed">{palette.sample}</p>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border-t-4 border-primary-fill bg-surface p-5">
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-primary">
-              Novela · Principal
-            </p>
-            <p className="mt-1 font-display text-2xl">Re:Zero</p>
-            <p className="font-mono text-[11px] uppercase tracking-widest text-muted">38 volúmenes</p>
-          </div>
-          <div className="rounded-lg border-t-4 border-accent-fill bg-accent-soft p-5">
-            <p className="font-mono text-[11px] uppercase tracking-[0.25em] text-accent">
-              Manga · Arco 4
-            </p>
-            <p className="mt-1 font-display text-2xl">El Santuario</p>
-            <p className="font-mono text-[11px] uppercase tracking-widest text-muted">12 tomos</p>
-          </div>
-        </div>
-
+        <CoverGrid
+          label={`Portadas de ejemplo · ${palette.character}`}
+          items={[
+            {
+              key: "sample",
+              to: "#comparativa-portadas",
+              title,
+              caption: sampleWork ? `${sampleWork.volumeCount} volúmenes` : "Novela ligera",
+              image: sampleWork?.cover ?? null,
+            },
+            {
+              key: "generic",
+              to: "#comparativa-portadas",
+              title: "Portada genérica",
+              caption: "Sin ilustración",
+              image: null,
+            },
+          ]}
+        />
+        <p className="mt-8 font-ui text-sm text-muted">
+          Acciones compartidas del lector. Los botones son ejemplos y no modifican tu progreso;
+          los enlaces llevan a secciones de esta guía.
+        </p>
         <div className="mt-6 flex flex-wrap items-center gap-4">
-          <button className="rounded-md bg-button px-5 py-2.5 font-ui text-sm uppercase tracking-[0.2em] text-button-foreground transition-colors hover:bg-button-hover">
-            Comenzar lectura
-          </button>
-          <button className="rounded-md border border-secondary-border bg-secondary px-5 py-2.5 font-ui text-sm uppercase tracking-[0.2em] text-secondary-foreground transition-opacity hover:opacity-80">
-            Ver índice
-          </button>
-          <span className="rounded-full bg-badge px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-badge-foreground ring-1 ring-badge-border">
-            Nuevo · Cap. 42
-          </span>
-          <a href="#" className="font-ui text-sm text-primary underline underline-offset-4 hover:text-accent">
-            Enlace de ejemplo
-          </a>
+          <ButtonLink to="#comparativa-portadas">Ver portadas</ButtonLink>
+          <ButtonLink to="#tipografia" variant="outline" size="sm" shape="pill">
+            <span aria-hidden="true" className="text-primary">✦</span>
+            Ver tipografía
+          </ButtonLink>
+          <Button size="sm" shape="pill" onClick={() => setNotice("Ejemplo: volverías a tu posición de lectura.")}>
+            Continuar donde lo dejaste (42 %)
+          </Button>
+          <Button variant="text" size="label" onClick={() => setNotice("Ejemplo: se olvidaría el progreso de esta obra.")}>
+            Olvidar progreso
+          </Button>
+          <Button variant="ghost" size="icon" shape="pill" aria-label="Cerrar ejemplo" onClick={() => setNotice("")}>
+            <span aria-hidden="true">✕</span>
+          </Button>
+          <Button disabled>Sin progreso guardado</Button>
         </div>
+        <p role="status" className="mt-3 min-h-10 font-ui text-sm text-muted">{notice}</p>
       </div>
     </div>
   );
@@ -432,11 +439,12 @@ export default function StyleGuide({ loaderData: { sampleWork } }: Route.Compone
       <section>
         <SectionTitle>Temas</SectionTitle>
         <p className="mb-6 font-ui text-sm text-muted">
-          Cada vista previa usa los mismos componentes; solo cambia el atributo data-theme.
+          Cada vista previa reutiliza el logo, la cuadrícula de portadas y las acciones del sitio;
+          solo cambia el atributo data-theme. No representa una pantalla nueva ni añade funciones.
         </p>
         <div className="space-y-10">
           {characterPalettes.map((palette) => (
-            <ThemePreview key={palette.id} palette={palette} />
+            <ThemePreview key={palette.id} palette={palette} sampleWork={sampleWork} />
           ))}
         </div>
       </section>
@@ -457,7 +465,7 @@ export default function StyleGuide({ loaderData: { sampleWork } }: Route.Compone
         </div>
       </section>
 
-      <section>
+      <section id="tipografia" className="scroll-mt-24">
         <SectionTitle>Tipografía</SectionTitle>
         <div className="space-y-8">
           {typefaces.map((typeface) => (

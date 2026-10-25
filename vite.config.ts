@@ -21,6 +21,7 @@ function contentReload(): Plugin {
     name: "content-reload",
     configureServer(server) {
       const novelsDirectory = path.resolve("content", "novela");
+      const mangaDirectory = path.resolve("content", "manga");
       const imageManifestFile = path.resolve("content", "images.json");
       let restartTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -29,7 +30,8 @@ function contentReload(): Plugin {
         const absoluteFile = path.resolve(file);
         const isNovelData =
           absoluteFile.startsWith(novelsDirectory + path.sep) && /\.(md|yaml)$/.test(absoluteFile);
-        if (!isNovelData && absoluteFile !== imageManifestFile) return;
+        const isMangaData = absoluteFile.startsWith(mangaDirectory + path.sep) && absoluteFile.endsWith(".yaml");
+        if (!isNovelData && !isMangaData && absoluteFile !== imageManifestFile) return;
 
         clearTimeout(restartTimer);
         restartTimer = setTimeout(() => {
@@ -40,7 +42,7 @@ function contentReload(): Plugin {
         }, 300);
       }
 
-      server.watcher.add([novelsDirectory, imageManifestFile]);
+      server.watcher.add([novelsDirectory, mangaDirectory, imageManifestFile]);
       server.watcher.on("all", onContentChange);
       server.httpServer?.once("close", () => {
         clearTimeout(restartTimer);

@@ -1,4 +1,5 @@
 import { getNextTheme, themeStorageKey, type Theme } from "./theme";
+import { cloneThemeContent } from "./theme-wave";
 
 const waveDuration = 750;
 // Fast clicks queue up and leave at least this far apart, so each wave reads as
@@ -52,18 +53,14 @@ function createWave(theme: Theme) {
   wave.style.height = `${root.clientHeight}px`;
 
   // The copy scrolls inside the wave like the page does, so the sticky header stays put.
-  const page = document.createElement("div");
+  const snapshotDocument = document.createElement("template").content.ownerDocument;
+  const page = snapshotDocument.createElement("div");
   page.className = document.body.className;
   for (const child of document.body.children) {
     if (child.tagName === "SCRIPT" || child.tagName === "LINK" || waves.includes(child as HTMLElement)) continue;
-    page.append(child.cloneNode(true));
+    page.append(cloneThemeContent(child, snapshotDocument));
   }
   for (const element of page.querySelectorAll("[id]")) element.removeAttribute("id");
-  // Images are already loaded; show them on the first frame instead of blinking in.
-  for (const image of page.querySelectorAll("img")) {
-    image.loading = "eager";
-    image.decoding = "sync";
-  }
 
   wave.append(page);
   document.body.append(wave);

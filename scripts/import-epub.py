@@ -83,7 +83,8 @@ def moveEdgePunctuation(inlines):
         prefix, suffix = [], []
         last = inner[-1]
         if isWord(after, 0) and last.get("t") == "Str" and not last["c"][-1].isalnum():
-            match = re.search(r"[^\w]+$", last["c"])
+            # Underscores are word characters in regexes, but not alphanumeric boundaries.
+            match = re.search(r"[\W_]+$", last["c"])
             moved, last["c"] = match.group(), last["c"][:match.start()]
             if not last["c"]:
                 inner.pop()
@@ -95,7 +96,7 @@ def moveEdgePunctuation(inlines):
                 suffix.insert(0, inner.pop())
         first = inner[0] if inner else None
         if first and isWord(before, -1) and first.get("t") == "Str" and not first["c"][0].isalnum():
-            match = re.match(r"[^\w]+", first["c"])
+            match = re.match(r"[\W_]+", first["c"])
             moved, first["c"] = match.group(), first["c"][match.end():]
             if not first["c"]:
                 inner.pop(0)

@@ -96,26 +96,33 @@ function parseProgress(raw: string | null): ReadingProgress {
 }
 
 let cache: ReadingProgress | undefined;
+let cachedRaw: string | null = null;
 const listeners = new Set<() => void>();
 
 export function readProgress(): ReadingProgress {
-  if (cache) return cache;
-  let raw: string | null = null;
   try {
-    raw = localStorage.getItem(storageKey);
+    const raw = localStorage.getItem(storageKey);
+    // Imperative readers may have no storage-event subscribers. Check storage
+    // on every read, but keep the snapshot stable while its raw value is unchanged.
+    if (!cache || raw !== cachedRaw) {
+      cache = parseProgress(raw);
+      cachedRaw = raw;
+    }
   } catch {
-    // Storage can be blocked (private mode, disabled cookies); act as if nothing was saved.
+    // Preserve this visit's in-memory progress while storage is unavailable.
   }
-  cache = parseProgress(raw);
-  return cache;
+  return (cache ??= emptyProgress);
 }
 
 function writeProgress(next: ReadingProgress) {
   cache = next;
   try {
-    localStorage.setItem(storageKey, JSON.stringify(next));
+    const raw = JSON.stringify(next);
+    localStorage.setItem(storageKey, raw);
+    cachedRaw = raw;
   } catch {
-    // Keep the in-memory value for this visit if storage is full or blocked.
+    // Keep the snapshot and its previous raw value: an unchanged persisted value
+    // must not replace in-memory progress after a failed write.
   }
   listeners.forEach((listener) => listener());
 }
@@ -162,9 +169,9 @@ export function clearWorkProgress(work: string) {
 }
 
 function onStorage(event: StorageEvent) {
-  // Another tab changed it; drop the cache so the next read sees the new value.
+  // Refresh from current storage, not the event payload (which may be outdated).
   if (event.key !== null && event.key !== storageKey) return;
-  cache = undefined;
+  readProgress();
   listeners.forEach((listener) => listener());
 }
 

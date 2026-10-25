@@ -20,6 +20,7 @@ export function ThemeButton() {
   return (
     <button
       type="button"
+      data-theme-toggle=""
       onClick={(event) => cycleTheme(event.currentTarget)}
       title="Cambiar personaje"
       className="block size-10 shrink-0 cursor-pointer touch-manipulation select-none overflow-hidden rounded-full bg-transparent ring-2 ring-header-accent transition hover:scale-105 focus-visible:outline-header-accent"

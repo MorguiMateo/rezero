@@ -1,3 +1,3 @@
-// Novel and manga sections are hidden for now: no nav links, no home shelves, no prerendered pages.
-// To publish them again, set this to true and drop the route globs from `exclude` in tsconfig.json.
+// Hide standalone catalogs and their navigation links, not home shelves or readers.
+// To publish the catalogs, set this to true and remove their exclusions in tsconfig.json.
 export const contentSectionsEnabled = false;

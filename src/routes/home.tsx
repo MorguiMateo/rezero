@@ -23,7 +23,6 @@ export const meta: MetaFunction = () => [
 export const links: Route.LinksFunction = () => [fontPreload(literataFont), fontPreload(jetbrainsMonoFont)];
 
 export async function loader() {
-  if (!contentSectionsEnabled) return { works: [], mangaWorks: [] };
   return { works: await getWorks(), mangaWorks: await getMangaWorks() };
 }
 
@@ -47,7 +46,6 @@ function CornerStar({ className }: { className: string }) {
   );
 }
 
-// Collection panel with a double frame and a star on each corner.
 function FramedSection({
   eyebrow,
   title,
@@ -69,13 +67,15 @@ function FramedSection({
         <header className="relative mx-6 mb-8 border-b border-border pb-5 text-center sm:mx-10">
           <p className="font-mono text-[0.7rem] tracking-[0.35em] text-primary uppercase">{eyebrow}</p>
           <h2 className="mt-1 font-display text-5xl font-medium tracking-wide text-foreground sm:text-6xl">{title}</h2>
-          <Link
-            to={href}
-            prefetch="intent"
-            className="mt-3 inline-block font-ui text-xs tracking-[0.25em] text-secondary-foreground uppercase hover:text-primary sm:absolute sm:right-0 sm:bottom-6 sm:mt-0"
-          >
-            Ver todo →
-          </Link>
+          {contentSectionsEnabled && (
+            <Link
+              to={href}
+              prefetch="intent"
+              className="mt-3 inline-block font-ui text-xs tracking-[0.25em] text-secondary-foreground uppercase hover:text-primary sm:absolute sm:right-0 sm:bottom-6 sm:mt-0"
+            >
+              Ver todo →
+            </Link>
+          )}
         </header>
         {children}
       </div>
@@ -92,7 +92,6 @@ type ShelfBook = {
   image: ContentImage | null;
 };
 
-// A row of books. With few works they wrap onto another row instead of scrolling sideways.
 function Shelf({ label, books }: { label: string; books: ShelfBook[] }) {
   return (
     <ul
@@ -127,7 +126,6 @@ function Shelf({ label, books }: { label: string; books: ShelfBook[] }) {
 export default function Home({ loaderData: { works, mangaWorks } }: Route.ComponentProps) {
   return (
     <div className="relative isolate flex flex-col gap-14 pb-20 sm:gap-20">
-      {/* Night sky: two soft glows and a sparse field of stars. */}
       <div
         aria-hidden="true"
         className="absolute inset-x-0 top-0 -z-10 h-[46rem] bg-[radial-gradient(ellipse_70%_55%_at_50%_0%,color-mix(in_oklab,var(--theme-primary-fill)_28%,transparent),transparent),radial-gradient(ellipse_40%_35%_at_85%_30%,color-mix(in_oklab,var(--theme-accent-fill)_16%,transparent),transparent)]"
@@ -147,44 +145,40 @@ export default function Home({ loaderData: { works, mangaWorks } }: Route.Compon
           La novela ligera y el manga de Re:Zero, ordenados como en los estantes de una biblioteca.
         </p>
         {/* Height reserved so the link appearing after hydration does not push the shelves down. */}
-        {contentSectionsEnabled && (
-          <div className="flex min-h-10 w-full max-w-xl justify-center">
-            <LatestReading works={works} />
-          </div>
-        )}
+        <div className="flex min-h-10 w-full max-w-xl justify-center">
+          <LatestReading works={works} />
+        </div>
       </section>
 
-      {contentSectionsEnabled && (
-        <div className="flex flex-col gap-14 px-3 sm:gap-20 sm:px-6">
-          <FramedSection eyebrow="Colección literaria" title="Novelas" href="/novela">
-            <Shelf
-              label="Novelas"
-              books={works.map((work) => ({
-                slug: work.slug,
-                href: `/novela/${work.slug}`,
-                label: work.label,
-                title: work.title,
-                caption: `${work.volumeCount} ${work.volumeCount === 1 ? "volumen" : "volúmenes"}`,
-                image: work.cover,
-              }))}
-            />
-          </FramedSection>
+      <div className="flex flex-col gap-14 px-3 sm:gap-20 sm:px-6">
+        <FramedSection eyebrow="Colección literaria" title="Novelas" href="/novela">
+          <Shelf
+            label="Novelas"
+            books={works.map((work) => ({
+              slug: work.slug,
+              href: `/novela/${work.slug}`,
+              label: work.label,
+              title: work.title,
+              caption: `${work.volumeCount} ${work.volumeCount === 1 ? "volumen" : "volúmenes"}`,
+              image: work.cover,
+            }))}
+          />
+        </FramedSection>
 
-          <FramedSection eyebrow="Colección ilustrada" title="Mangas" href="/manga">
-            <Shelf
-              label="Mangas"
-              books={mangaWorks.map((work) => ({
-                slug: work.slug,
-                href: `/manga/${work.slug}`,
-                label: work.label,
-                title: work.title,
-                caption: `${work.volumeCount} ${work.volumeCount === 1 ? "serie" : "series"}`,
-                image: work.cover,
-              }))}
-            />
-          </FramedSection>
-        </div>
-      )}
+        <FramedSection eyebrow="Colección ilustrada" title="Mangas" href="/manga">
+          <Shelf
+            label="Mangas"
+            books={mangaWorks.map((work) => ({
+              slug: work.slug,
+              href: `/manga/${work.slug}`,
+              label: work.label,
+              title: work.title,
+              caption: `${work.volumeCount} ${work.volumeCount === 1 ? "serie" : "series"}`,
+              image: work.cover,
+            }))}
+          />
+        </FramedSection>
+      </div>
     </div>
   );
 }
