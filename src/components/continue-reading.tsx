@@ -1,4 +1,5 @@
 import { Button, ButtonLink } from "@/components/button";
+import { ReadingProgressSkeleton } from "@/components/reading-progress-skeleton";
 import { type LastRead, type ReadingProgress, clearWorkProgress, minShownPercent, useReadingProgress } from "@/lib/reading-progress";
 
 function lastReadPath(work: string, last: LastRead) {
@@ -17,11 +18,13 @@ function latestRead(progress: ReadingProgress, works: string[]) {
     .sort((a, b) => b.last.at - a.last.at)[0];
 }
 
-// Both render nothing in the prerendered HTML: progress only exists in the browser.
-// Callers reserve their height so the page does not shift when they appear.
+// The prerendered skeleton never depends on browser storage. A known empty
+// snapshot removes it; a saved entry replaces it with the real action.
 
 export function ContinueReading({ work }: { work: string }) {
-  const last = useReadingProgress()?.last[work];
+  const progress = useReadingProgress();
+  if (progress === null) return <ReadingProgressSkeleton />;
+  const last = progress.last[work];
   if (!last) return null;
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -45,7 +48,8 @@ export function ContinueReading({ work }: { work: string }) {
 
 export function LatestReading({ works }: { works: { slug: string; title: string }[] }) {
   const progress = useReadingProgress();
-  const latest = progress && latestRead(progress, works.map((work) => work.slug));
+  if (progress === null) return <ReadingProgressSkeleton appearance="outline" shape="pill" />;
+  const latest = latestRead(progress, works.map((work) => work.slug));
   if (!latest) return null;
   const workTitle = works.find((work) => work.slug === latest.work)?.title;
   return (

@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import jetbrainsMonoFont from "@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url";
 import literataFont from "@fontsource-variable/literata/files/literata-latin-wght-normal.woff2?url";
 import { BookCover, coverTones } from "@/components/book-cover";
+import { CoverReveal } from "@/components/cover-reveal";
 import { LatestReading } from "@/components/continue-reading";
 import { PleiadesMark } from "@/components/pleiades-mark";
 import { fontPreload } from "@/lib/font-preload";
@@ -150,7 +151,7 @@ export default function Home({ loaderData: { works, mangaWorks } }: Route.Compon
         </div>
       </section>
 
-      <div className="flex flex-col gap-14 px-3 sm:gap-20 sm:px-6">
+      <CoverReveal className="flex flex-col gap-14 px-3 sm:gap-20 sm:px-6">
         <FramedSection eyebrow="Colección literaria" title="Novelas" href="/novela">
           <Shelf
             label="Novelas"
@@ -178,7 +179,7 @@ export default function Home({ loaderData: { works, mangaWorks } }: Route.Compon
             }))}
           />
         </FramedSection>
-      </div>
+      </CoverReveal>
     </div>
   );
 }

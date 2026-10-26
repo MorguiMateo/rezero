@@ -48,6 +48,25 @@
   box-shadow: 0 0 20px 2px color-mix(in oklab, var(--theme-primary) 18%, transparent);
 }
 
+/* Images still download behind the existing cover skeletons. Without JavaScript,
+   show the prerendered images normally instead of waiting for hydration. */
+@media (scripting: enabled) {
+  [data-cover-reveal="pending"] [data-book-cover-image] {
+    visibility: hidden;
+  }
+}
+
+[data-book-cover-image][data-cover-unavailable] {
+  visibility: hidden;
+}
+
+/* Reading progress is unavailable without JavaScript; do not leave a loading indicator behind. */
+@media (scripting: none) {
+  [data-reading-progress-skeleton] {
+    display: none;
+  }
+}
+
 @layer base {
   body {
     background-color: var(--theme-background);

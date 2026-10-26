@@ -81,6 +81,7 @@ export function BookCover({
         <GenericCover title={title} tone={tone} placeholder={image !== null} />
         {image && (
           <img
+            data-book-cover-image=""
             src={image.src}
             width={image.width}
             height={image.height}

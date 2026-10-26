@@ -3,7 +3,7 @@ import { data } from "react-router";
 import literataFont from "@fontsource-variable/literata/files/literata-latin-wght-normal.woff2?url";
 import { ChapterNavigation } from "@/components/chapter-navigation";
 import { ReaderBar } from "@/components/reader-bar";
-import { ResumeToast } from "@/components/resume-toast";
+import { ResumeToast, ResumeToastSkeleton } from "@/components/resume-toast";
 import { fontPreload } from "@/lib/font-preload";
 import { getChapter } from "@/lib/content/novels.server";
 import type { ChapterDetail, ChapterLink } from "@/lib/content/types";
@@ -41,7 +41,7 @@ function ChapterReader({ chapter }: { chapter: ChapterDetail }) {
   const { work, volume } = chapter;
   const volumePath = `/novela/${work.slug}/${volume.slug}`;
   const articleRef = useRef<HTMLElement>(null);
-  const { resume, resumeReading, dismissResume } = useChapterTracking(
+  const { resume, resumeLoading, resumeReading, dismissResume } = useChapterTracking(
     articleRef,
     { work: work.slug, volume: volume.slug, chapter: chapter.slug, title: chapter.title },
     chapter.next && { volume: chapter.next.volumeSlug, chapter: chapter.next.chapterSlug, title: chapter.next.title },
@@ -67,7 +67,11 @@ function ChapterReader({ chapter }: { chapter: ChapterDetail }) {
           next={chapter.next && { to: chapterPath(work.slug, chapter.next), title: chapter.next.title }}
         />
       </div>
-      {resume && <ResumeToast percent={resume.percent} onResume={resumeReading} onDismiss={dismissResume} />}
+      {resumeLoading ? (
+        <ResumeToastSkeleton />
+      ) : resume ? (
+        <ResumeToast percent={resume.percent} onResume={resumeReading} onDismiss={dismissResume} />
+      ) : null}
     </div>
   );
 }

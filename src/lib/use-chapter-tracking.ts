@@ -51,7 +51,8 @@ export function useChapterTracking(
   { work, volume, chapter, title }: ChapterRef,
   next: NextChapterRef | null,
 ) {
-  const [resume, setResume] = useState<ChapterProgress | null>(null);
+  // Undefined means the saved position and scroll restoration have not been checked yet.
+  const [resume, setResume] = useState<ChapterProgress | null | undefined>(undefined);
   // While a saved spot is on offer, saving pauses so a quick look at the top
   // does not overwrite it; it ends when the reader resumes, dismisses or scrolls past it.
   const offeredRef = useRef<ChapterProgress | null>(null);
@@ -107,6 +108,7 @@ export function useChapterTracking(
     const startFrame = requestAnimationFrame(() => {
       const position = measure(article);
       if (position.done) {
+        setResume(null);
         // Short pages that fit on screen are read as soon as they open.
         latest = position;
         dirty = true;
@@ -114,6 +116,8 @@ export function useChapterTracking(
       } else if (saved && !saved.done && saved.percent > minShownPercent && window.scrollY < 100) {
         offeredRef.current = saved;
         setResume(saved);
+      } else {
+        setResume(null);
       }
     });
 
@@ -143,5 +147,5 @@ export function useChapterTracking(
     setResume(null);
   }
 
-  return { resume, resumeReading, dismissResume };
+  return { resume, resumeLoading: resume === undefined, resumeReading, dismissResume };
 }

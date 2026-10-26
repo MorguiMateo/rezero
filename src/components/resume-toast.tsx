@@ -1,4 +1,13 @@
 import { Button } from "@/components/button";
+import { ReadingProgressSkeleton } from "@/components/reading-progress-skeleton";
+
+export function ResumeToastSkeleton() {
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-center px-4">
+      <ReadingProgressSkeleton shape="pill" />
+    </div>
+  );
+}
 
 // Offers to jump back to where the reader left a chapter. The page starts at the
 // top, so nothing moves unless they ask.
